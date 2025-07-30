@@ -41,11 +41,21 @@ player_update(struct player_data *self, float dt) {
         (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPISOLON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
-  log_infolf("%g  %g", self->wiggle_target, self->wiggle_cur);
 }
 
 void
 player_render(struct player_data *self) {
+  renderer_request_quad(
+    self->position,
+    self->texture_position,
+    V2U(16, 16),
+    V2(-0.125f, -0.125f),
+    self->angle,
+    self->scale,
+    BLACK,
+    0.4f,
+    1.0f
+  );
   renderer_request_quad(
     self->position,
     self->texture_position,
@@ -55,6 +65,6 @@ player_render(struct player_data *self) {
     self->scale,
     WHITE,
     1.0f,
-    1.0f
+    0.0f
   );
 }

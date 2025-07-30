@@ -11,6 +11,7 @@ struct player_data {
   struct v2 pivot;
   float angle;
   float depth;
+  struct v2 direction;
   float wiggle_cur;
   float wiggle_target;
 };

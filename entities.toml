@@ -3,6 +3,7 @@
 [entity.unique.player]
 component = [ "renderable" ]
 exclude   = [ "color", "opacity", "texture_size" ]
+field.direction     = "struct v2"
 field.wiggle_cur    = "float"
 field.wiggle_target = "float"
 

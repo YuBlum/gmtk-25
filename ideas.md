@@ -21,3 +21,12 @@ What code this be?
 For now do the gameplay loop of entering a room, enemy waves, kill the enemies and thats it.
 
 After that think of some random thing to put after a few rooms.
+
+scrap most of the previous ideas.
+
+__Recursive Room__ (name of the game probably)
+Is going to be an escape room.
+One room with a bunch of items, you can place some items into somewhere in the room, when you exit the room you end up in the same room, but things change depending on the items put in the input, some new items pop up and so on. The objective will be to find the correct order of items to exit the room.
+
+Maybe add some simple story-line about a shut-in person overcomming their stuff, maybe the items cold relate to that it would be cool.
+
