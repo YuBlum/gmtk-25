@@ -1,6 +1,7 @@
 #if LINUX
 #  include <sys/mman.h>
 #elif WINDOWS
+#  include <windows.h>
 #endif
 #include <string.h>
 #include "engine/arena.h"
@@ -19,18 +20,23 @@ is_power_of_2_non_zero(size_t alignment, const char *func_name) {
 
 struct arena *
 arena_make(size_t capacity, size_t alignment) {
-  if (!capacity) capacity = 1ull << 33; // defaults to 8G
+  if (!capacity) capacity = (1ull << 32) - sizeof (struct arena); // defaults to 4G
+  struct arena *arena;
+  uint64_t amount_to_alloc = sizeof (struct arena) + capacity;
 #if LINUX 
-  struct arena *arena = mmap(0, sizeof (struct arena) + capacity, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  arena = mmap(0, amount_to_alloc, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
   if (arena == MAP_FAILED) {
-    log_errorlf("%s: couldn't allocate memory for the arena", __func__);
-    return 0;
-  }
 #elif WINDOWS
-  static_assert(0, "TODO: VirtualAlloc");
+  arena = VirtualAlloc(0, amount_to_alloc, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+  if (!arena) {
+    DWORD err = GetLastError();
+    log_errorlf("%s: VirtualAlloc failed with error code: %ld", __func__, err);
 #else
 #  error "platform not supported"
 #endif
+    log_errorlf("%s: couldn't allocate memory for the arena", __func__);
+    return 0;
+  }
 # if DEV
   if (!is_power_of_2_non_zero(alignment, "arena_make")) return 0;
 #endif
@@ -52,16 +58,17 @@ arena_destroy(struct arena *arena) {
     log_errorlf("%s: passing invalid arena", __func__);
     return false;
   }
-  int munmap_res =
+  uint64_t amount_to_free = sizeof (struct arena) + arena->main_capacity;
+  bool free_res =
 #endif
 #if LINUX
-  munmap(arena, sizeof (struct arena) + arena->main_capacity);
+  munmap(arena, amount_to_free) == 0;
 #elif WINDOWS
-  static_assert(0, "TODO: VirtualFree");
+  VirtualFree(arena, amount_to_free, MEM_DECOMMIT);
 #endif
 #if DEV
-  if (munmap_res != 0) {
-    log_errorlf("%s: munmap failed", __func__);
+  if (!free_res) {
+    log_errorlf("%s: failed to free arena memory", __func__);
     return false;
   }
 #endif

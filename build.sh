@@ -24,8 +24,11 @@ if [ "$1" = "win" ]; then
 vendor/glad/win-glad.o \
 vendor/stb_image/win-stb_image.o \
 vendor/miniaudio/win-miniaudio.o \
+-static-libgcc \
 -lwin-glfw3 \
 -lgdi32 \
+-static \
+-lpthread \
 "
   OUT+=".exe"
   CC=x86_64-w64-mingw32-gcc
