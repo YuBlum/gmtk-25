@@ -32,9 +32,9 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate some_entity position data");
       return false;
     }
-    g_entities.some_entity_data.size = arena_push_array(g_entities.arena, false, struct v2, layout->some_entity_amount);
-    if (!g_entities.some_entity_data.size) {
-      log_errorl("couldn't allocate some_entity size data");
+    g_entities.some_entity_data.scale = arena_push_array(g_entities.arena, false, struct v2, layout->some_entity_amount);
+    if (!g_entities.some_entity_data.scale) {
+      log_errorl("couldn't allocate some_entity scale data");
       return false;
     }
     g_entities.some_entity_data.texture_position = arena_push_array(g_entities.arena, false, struct v2u, layout->some_entity_amount);
@@ -45,6 +45,11 @@ entities_layout_set(const struct entities_layout *layout) {
     g_entities.some_entity_data.texture_size = arena_push_array(g_entities.arena, false, struct v2u, layout->some_entity_amount);
     if (!g_entities.some_entity_data.texture_size) {
       log_errorl("couldn't allocate some_entity texture_size data");
+      return false;
+    }
+    g_entities.some_entity_data.pivot = arena_push_array(g_entities.arena, false, struct v2, layout->some_entity_amount);
+    if (!g_entities.some_entity_data.pivot) {
+      log_errorl("couldn't allocate some_entity pivot data");
       return false;
     }
     g_entities.some_entity_data.angle = arena_push_array(g_entities.arena, false, float, layout->some_entity_amount);

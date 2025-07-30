@@ -32,7 +32,7 @@ vendor/miniaudio/win-miniaudio.o \
 -lpthread \
 "
   OUT+=".exe"
-  CC=x86_64-w64-mingw32-gcc-strip
+  CC=x86_64-w64-mingw32-gcc
 elif [ "$1" = "lin" ]; then
   DEF+=" -DLINUX"
   SRCS+=" ./src/engine/x64lin.c"
@@ -50,4 +50,6 @@ fi
 
 echo "$SRCS"
 
+rm -f $OUT
 $CC $FLAGS $DEF $SRCS $LIBS $INCS -o $OUT
+./$OUT

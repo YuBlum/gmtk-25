@@ -6,9 +6,10 @@
 
 struct some_entity_data {
   struct v2 *position;
-  struct v2 *size;
+  struct v2 *scale;
   struct v2u *texture_position;
   struct v2u *texture_size;
+  struct v2 *pivot;
   float *angle;
   struct color *color;
   float *opacity;

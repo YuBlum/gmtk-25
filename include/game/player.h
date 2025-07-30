@@ -6,9 +6,13 @@
 
 struct player_data {
   struct v2 position;
+  struct v2 scale;
   struct v2u texture_position;
+  struct v2 pivot;
   float angle;
   float depth;
+  float wiggle_cur;
+  float wiggle_target;
 };
 
 void player_init(struct player_data *self);

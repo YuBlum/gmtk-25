@@ -13,6 +13,7 @@
 struct vertex {
   struct v2    position;
   struct v2    texcoord;
+  struct v2    origin;
   struct v2    angle;
   struct color color;
   float        opacity;
@@ -199,11 +200,13 @@ renderer_make(void) {
   glEnableVertexAttribArray(2);
   glEnableVertexAttribArray(3);
   glEnableVertexAttribArray(4);
+  glEnableVertexAttribArray(5);
   glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, position));
   glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, texcoord));
-  glVertexAttribPointer(2, 4, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, angle));
-  glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, color));
-  glVertexAttribPointer(4, 1, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, opacity));
+  glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, origin));
+  glVertexAttribPointer(3, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, angle));
+  glVertexAttribPointer(4, 3, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, color));
+  glVertexAttribPointer(5, 1, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, opacity));
   log_infol("vao, vbo and ibo created successfully");
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
@@ -241,7 +244,7 @@ renderer_submit(void) {
 }
 
 void
-renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2 sizes[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const float angle[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount]) {
+renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const struct v2 origin[amount], const float angle[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount]) {
 #if DEV
   if (g_renderer.quads_amount + amount >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
@@ -249,13 +252,19 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
   }
 #endif
   struct v2 size_half, tpos, tsiz, cos_sin;
-  static_assert(sizeof (struct vertex) == sizeof (float) * 10);
+  static_assert(sizeof (struct vertex) == sizeof (float) * 12);
   for (uint32_t i = 0; i < amount; i++) {
-    size_half = v2_muls(sizes[i], 0.5f);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].position = v2_add(positions[i], V2(-size_half.x, -size_half.y));
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].position = v2_add(positions[i], V2(+size_half.x, -size_half.y));
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = v2_add(positions[i], V2(+size_half.x, +size_half.y));
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = v2_add(positions[i], V2(-size_half.x, +size_half.y));
+    size_half = V2(texture_sizes[i].x * 0.5f * UNIT_ONE_PIXEL, texture_sizes[i].y * 0.5f * UNIT_ONE_PIXEL);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].origin = v2_mul(v2_add(origin[i], V2(-size_half.x, -size_half.y)), scales[i]);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].origin = v2_mul(v2_add(origin[i], V2(+size_half.x, -size_half.y)), scales[i]);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].origin = v2_mul(v2_add(origin[i], V2(+size_half.x, +size_half.y)), scales[i]);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].origin = v2_mul(v2_add(origin[i], V2(-size_half.x, +size_half.y)), scales[i]);
+  }
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].position = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].position = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = positions[i];
   }
   for (uint32_t i = 0; i < amount; i++) {
     tpos = v2_muls(V2U_V2(texture_positions[i]), ATLAS_PIXEL);
@@ -264,6 +273,13 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
     g_renderer.vertices[g_renderer.quads_amount + i].v[1].texcoord = v2_add(tpos, V2(tsiz.x, tsiz.y));
     g_renderer.vertices[g_renderer.quads_amount + i].v[2].texcoord = v2_add(tpos, V2(tsiz.x, 0.0f  ));
     g_renderer.vertices[g_renderer.quads_amount + i].v[3].texcoord = v2_add(tpos, V2(0.0f  , 0.0f  ));
+  }
+  for (uint32_t i = 0; i < amount; i++) {
+    cos_sin = V2(cosf(angle[i]), sinf(angle[i]));
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].angle = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].angle = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].angle = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].angle = positions[i];
   }
   for (uint32_t i = 0; i < amount; i++) {
     cos_sin = V2(cosf(angle[i]), sinf(angle[i]));
@@ -292,27 +308,31 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
 }
 
 void
-renderer_request_quad(struct v2 position, struct v2 size, struct v2u texture_position, struct v2u texture_size, float angle, struct color color, float opacity, float depth) {
+renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth) {
 #if DEV
   if (g_renderer.quads_amount + 1 >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
     return;
   }
 #endif
-  static_assert(sizeof (struct vertex) == sizeof (float) * 10);
-  struct v2 size_half = v2_muls(size, 0.5f),
+  static_assert(sizeof (struct vertex) == sizeof (float) * 12);
+  struct v2 size_half = V2(texture_size.x * 0.5f * UNIT_ONE_PIXEL, texture_size.y * 0.5f * UNIT_ONE_PIXEL),
             tpos = v2_muls(V2U_V2(texture_position), ATLAS_PIXEL),
             tsiz = v2_muls(V2U_V2(texture_size), ATLAS_PIXEL),
             cos_sin = { cosf(angle), sinf(angle) };
   struct vertex *vertices = g_renderer.vertices[g_renderer.quads_amount].v;
-  vertices[0].position = v2_add(position, V2(-size_half.x, -size_half.y));
-  vertices[1].position = v2_add(position, V2(+size_half.x, -size_half.y));
-  vertices[2].position = v2_add(position, V2(+size_half.x, +size_half.y));
-  vertices[3].position = v2_add(position, V2(-size_half.x, +size_half.y));
+  vertices[0].position = position;
+  vertices[1].position = position;
+  vertices[2].position = position;
+  vertices[3].position = position;
   vertices[0].texcoord = v2_add(tpos, V2(0.0f  , tsiz.y));
   vertices[1].texcoord = v2_add(tpos, V2(tsiz.x, tsiz.y));
   vertices[2].texcoord = v2_add(tpos, V2(tsiz.x, 0.0f  ));
   vertices[3].texcoord = v2_add(tpos, V2(0.0f  , 0.0f  ));
+  vertices[0].origin = v2_mul(v2_add(origin, V2(-size_half.x, -size_half.y)), scale);
+  vertices[1].origin = v2_mul(v2_add(origin, V2(+size_half.x, -size_half.y)), scale);
+  vertices[2].origin = v2_mul(v2_add(origin, V2(+size_half.x, +size_half.y)), scale);
+  vertices[3].origin = v2_mul(v2_add(origin, V2(-size_half.x, +size_half.y)), scale);
   vertices[0].angle = cos_sin;
   vertices[1].angle = cos_sin;
   vertices[2].angle = cos_sin;

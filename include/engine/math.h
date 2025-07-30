@@ -8,6 +8,9 @@
 #define RAD2DEG (180.0f/PI)
 #define DEG2RAD (PI/180.0f)
 
+static inline float lerp(float a, float b, float t) { return a + t * (b - a); }
+static inline float signf(float x) { return (x > 0.0f) - (x < 0.0f); }
+
 struct v2 { float x, y; };
 #define V2(x, y) ((struct v2) {x, y})
 #define V2S(x) ((struct v2) {x, x})
@@ -26,6 +29,7 @@ static inline float v2_dot(struct v2 v0, struct v2 v1) { return v0.x*v1.x + v0.y
 static inline float v2_magsq(struct v2 v) { return v.x*v.x + v.y*v.y; }
 static inline float v2_mag(struct v2 v) { return sqrt(v.x*v.x + v.y*v.y); }
 static inline struct v2 v2_unit(struct v2 v) { float mag = sqrt(v.x*v.x + v.y*v.y); return mag == 0.0f ? V2S(0.0f) : V2(v.x/mag, v.y/mag); }
+static inline struct v2 v2_lerp(struct v2 a, struct v2 b, float t) { return V2(lerp(a.x, b.x, t), lerp(b.y, b.y, t)); }
 
 struct v2u { uint32_t x, y; };
 #define V2U(x, y) ((struct v2u) {x, y})
