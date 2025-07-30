@@ -19,6 +19,7 @@ INCS="\
 "
 
 if [ "$1" = "win" ]; then
+  FLAGS+=" -O2 -s -ffunction-sections -fdata-sections -Wl,--gc-sections"
   DEF+=" -DWINDOWS"
   SRCS+=" ./src/engine/x64win.c"
   LIBS+="\
