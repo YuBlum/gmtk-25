@@ -9,6 +9,7 @@ struct some_entity_data {
   struct v2 *size;
   struct v2u *texture_position;
   struct v2u *texture_size;
+  float *angle;
   struct color *color;
   float *opacity;
   float *depth;

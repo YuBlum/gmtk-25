@@ -47,6 +47,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate some_entity texture_size data");
       return false;
     }
+    g_entities.some_entity_data.angle = arena_push_array(g_entities.arena, false, float, layout->some_entity_amount);
+    if (!g_entities.some_entity_data.angle) {
+      log_errorl("couldn't allocate some_entity angle data");
+      return false;
+    }
     g_entities.some_entity_data.color = arena_push_array(g_entities.arena, false, struct color, layout->some_entity_amount);
     if (!g_entities.some_entity_data.color) {
       log_errorl("couldn't allocate some_entity color data");

@@ -7,6 +7,7 @@
 struct player_data {
   struct v2 position;
   struct v2u texture_position;
+  float angle;
   float depth;
 };
 

@@ -19,7 +19,6 @@ INCS="\
 "
 
 if [ "$1" = "win" ]; then
-  FLAGS+=" --target=x86_64-w64-windows-gnu -fuse-ld=lld"
   DEF+=" -DWINDOWS"
   SRCS+=" ./src/engine/x64win.c"
   LIBS+="\
@@ -33,7 +32,7 @@ vendor/miniaudio/win-miniaudio.o \
 -lpthread \
 "
   OUT+=".exe"
-  CC=clang
+  CC=x86_64-w64-mingw32-gcc-strip
 elif [ "$1" = "lin" ]; then
   DEF+=" -DLINUX"
   SRCS+=" ./src/engine/x64lin.c"

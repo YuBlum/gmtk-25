@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 #define PI 3.14159265358979323846
+#define RAD2DEG (180.0f/PI)
+#define DEG2RAD (PI/180.0f)
 
 struct v2 { float x, y; };
 #define V2(x, y) ((struct v2) {x, y})

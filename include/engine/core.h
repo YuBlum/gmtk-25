@@ -35,8 +35,8 @@
 #endif
 
 #define UNIT_PER_PIXEL 16.0f
-#define GAME_W_PIXEL 480
-#define GAME_H_PIXEL 270
+#define GAME_W_PIXEL 320
+#define GAME_H_PIXEL 320
 #define GAME_S 2
 #define GAME_W (GAME_W_PIXEL/UNIT_PER_PIXEL)
 #define GAME_H (GAME_H_PIXEL/UNIT_PER_PIXEL)
