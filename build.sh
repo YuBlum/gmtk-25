@@ -8,15 +8,22 @@ FLAGS="-Wall -Wextra -Werror -Wpedantic -std=c23"
 DEF="-DDEV"
 SRC=$(find ./src/ -type f -name "*.c" | tr '\n' ' ')
 LIBS="\
--L./vendor/ \
+-L./vendor/glfw/ \
 "
 INCS="\
--I./vendor/ \
+-I./vendor/glfw/ \
+-I./include/ \
+-I./vendor/glad/include \
+-I./vendor/stb_image \
+-I./vendor/miniaudio \
 "
 
 if [ "$1" = "win" ]; then
   DEF+=" -DWINDOWS"
   LIBS+="\
+vendor/glad/win-glad.o \
+vendor/stb_image/win-stb_image.o \
+vendor/miniaudio/win-miniaudio.o \
 -lwin-glfw3 \
 -lgdi32 \
 "
@@ -25,6 +32,9 @@ if [ "$1" = "win" ]; then
 elif [ "$1" = "lin" ]; then
   DEF+=" -DLINUX"
   LIBS+="\
+vendor/glad/lin-glad.o \
+vendor/stb_image/lin-stb_image.o \
+vendor/miniaudio/lin-miniaudio.o \
 -llin-glfw3 \
 -lm \
 "
