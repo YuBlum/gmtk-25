@@ -6,7 +6,7 @@ fi
 OUT="game"
 FLAGS="-Wall -Wextra -Werror -Wpedantic -std=c23"
 DEF="-DDEV"
-SRC=$(find ./src/ -type f -name "*.c" | tr '\n' ' ')
+SRCS=$(find ./src/ -type f -name "*.c" ! -path "./src/engine/x64win.c" ! -path "./src/engine/x64lin.c" | tr '\n' ' ')
 LIBS="\
 -L./vendor/glfw/ \
 "
@@ -20,6 +20,7 @@ INCS="\
 
 if [ "$1" = "win" ]; then
   DEF+=" -DWINDOWS"
+  SRCS+=" ./src/engine/x64win.c"
   LIBS+="\
 vendor/glad/win-glad.o \
 vendor/stb_image/win-stb_image.o \
@@ -34,6 +35,7 @@ vendor/miniaudio/win-miniaudio.o \
   CC=x86_64-w64-mingw32-gcc
 elif [ "$1" = "lin" ]; then
   DEF+=" -DLINUX"
+  SRCS+=" ./src/engine/x64lin.c"
   LIBS+="\
 vendor/glad/lin-glad.o \
 vendor/stb_image/lin-stb_image.o \
@@ -46,4 +48,6 @@ else
   echo "invalid target platform $1"
 fi
 
-$CC $FLAGS $DEF $SRC $LIBS $INCS -o $OUT
+echo "$SRCS"
+
+$CC $FLAGS $DEF $SRCS $LIBS $INCS -o $OUT

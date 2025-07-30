@@ -5,14 +5,12 @@
 #include <stdalign.h>
 
 struct arena {
-  size_t main_capacity;
-  size_t cur_capacity;
-  size_t top;
+  size_t capacity;
   size_t position;
   size_t position_prv;
   size_t alignment;
-  uint32_t array_length; /* <- for dynamic arrays */
-  uint8_t *base;
+  size_t commited;
+  size_t array_length; /* <- for dynamic arrays */
   uint8_t data[];
 };
 
@@ -41,10 +39,6 @@ bool arena_pop(struct arena *arena, size_t length);
 #define arena_pop_type(arena, T) arena_pop(arena, sizeof (T))
 #define arena_pop_array(arena, T, amount) arena_pop(arena, sizeof (T) * (amount))
 bool arena_clear(struct arena *arena);
-
-bool arena_scratch_begin(struct arena *arena, struct arena_state *state, size_t alignment);
-#define arena_scratch_begin_typed(arena, state, T) arena_scratch_begin(arena, state, alignof (T))
-bool arena_scratch_end(struct arena *arena, struct arena_state *state);
 
 static inline void *
 __arena_array_make__(size_t capacity, size_t alignment) {
