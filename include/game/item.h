@@ -5,12 +5,14 @@
 #include "engine/renderer.h"
 
 struct item_data {
-  struct v2 position;
-  struct v2u texture_position;
-  struct v2u texture_size;
-  struct v2 size;
-  struct v2 position_target;
-  bool being_held;
+  struct v2 *position;
+  struct v2u *texture_position;
+  struct v2u *texture_size;
+  float *depth;
+  struct v2 *size;
+  struct v2 *position_target;
+  uint32_t capacity;
+  uint32_t amount;
 };
 
 void item_init(struct item_data *self);

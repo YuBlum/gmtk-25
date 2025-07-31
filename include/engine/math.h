@@ -2,6 +2,7 @@
 #define __YMATH_H__
 
 #include <math.h>
+#include <stdlib.h>
 #include <stdint.h>
 
 #define PI 3.14159265358979323846
@@ -10,6 +11,8 @@
 
 static inline float lerp(float a, float b, float t) { return a + t * (b - a); }
 static inline float signf(float x) { return (x > 0.0f) - (x < 0.0f); }
+
+#define randf() ((float)rand()/(float)RAND_MAX)
 
 struct v2 { float x, y; };
 #define V2(x, y) ((struct v2) {x, y})

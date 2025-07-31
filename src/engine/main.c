@@ -35,7 +35,7 @@ main(void) {
   }
   if (!entities_layout_set(&(struct entities_layout) {
     .has_player = true,
-    .has_item = true,
+    .item_capacity = 5,
   })) {
     mixer_destroy();
     window_destroy();

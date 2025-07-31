@@ -5,12 +5,12 @@ field.direction     = "struct v2"
 field.wiggle_cur    = "float"
 field.wiggle_target = "float"
 field.interact_rad  = "float"
+field.held_item     = "int32_t"
 
-[entity.unique.item]
+[entity.item]
 component = [ "renderable", "collidable" ]
-exclude   = [ "color", "opacity", "origin", "scale", "angle", "depth" ]
+exclude   = [ "color", "opacity", "origin", "scale", "angle" ]
 field.position_target = "struct v2"
-field.being_held      = "bool"
 
 [component.renderable]
 position         = "struct v2"

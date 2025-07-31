@@ -17,6 +17,9 @@ for component, body in toml["component"].items():
         if type(typ) != str:
             print("fields have to be strings, but the field '", name, "' for component '", component, "' isn't", sep="")
             exit(1)
+        if name == "capacity":
+            print("field 'capacity' is reserved for SoA, but component '", component, "' is trying to define it", sep="")
+            exit(1)
         if name == "amount":
             print("field 'amount' is reserved for SoA, but component '", component, "' is trying to define it", sep="")
             exit(1)
@@ -53,11 +56,15 @@ def add_entity(entity, body, soa):
             if type(typ) != str:
                 print("fields have to be strings, but the field '", name, "' for entity '", entity, "' isn't", sep="")
                 exit(1)
+            if name == "capacity":
+                print("field 'capacity' is reserved for SoA, but entity '", entity, "' is trying to define it", sep="")
+                exit(1)
             if name == "amount":
                 print("field 'amount' is reserved for SoA, but entity '", entity, "' is trying to define it", sep="")
                 exit(1)
             entities_ir[entity][name] = typ
     if soa:
+        entities_ir[entity]["capacity"] = "uint32_t"
         entities_ir[entity]["amount"] = "uint32_t"
     entities_all.append(entity)
 
@@ -79,9 +86,9 @@ for entity, body in entities_ir.items():
     entity_headers[entity] += "#include \"engine/math.h\"\n"
     entity_headers[entity] += "#include \"engine/renderer.h\"\n\n"
     entity_headers[entity] += "struct " + entity + "_data {\n"
-    is_soa = "amount" in body
+    is_soa = "capacity" in body
     for name, typ in body.items():
-        separator = " " if not is_soa or name == "amount" else " *"
+        separator = " " if not is_soa or (name == "capacity" or name == "amount") else " *"
         entity_headers[entity] += "  " + typ + separator + name + ";\n"
     entity_headers[entity] += "};\n\n"
     entity_headers[entity] += "void " + entity + "_init(struct " + entity + "_data *self);\n"
@@ -111,7 +118,7 @@ for entity in entities_unique:
     entities_h += "#include \"game/" + entity + ".h\"\n"
 entities_h += "\nstruct entities_layout {\n"
 for entity in entities_soa:
-    entities_h += "  uint32_t " + entity + "_amount;\n"
+    entities_h += "  uint32_t " + entity + "_capacity;\n"
 for entity in entities_unique:
     entities_h += "  bool has_" + entity + ";\n"
 entities_h += "};\n\n"
@@ -149,19 +156,20 @@ entities_c += "}\n\n"
 entities_c += "bool\nentities_layout_set(const struct entities_layout *layout) {\n"
 entities_c += "  if (!arena_clear(g_entities.arena)) { log_errorl(\"couldn't clear entities arena\"); return false; }\n"
 for entity, body in entities_ir.items():
-    if "amount" in body:
-        entities_c += "  if (layout->" + entity + "_amount) {\n"
-        entities_c += "    g_entities." + entity + "_data.amount = layout->" + entity + "_amount;\n"
+    if "capacity" in body:
+        entities_c += "  if (layout->" + entity + "_capacity) {\n"
+        entities_c += "    g_entities." + entity + "_data.capacity = layout->" + entity + "_capacity;\n"
+        entities_c += "    g_entities." + entity + "_data.amount   = 0;\n"
         for name, typ in body.items():
-            if name == "amount": continue
-            entities_c += "    g_entities." + entity + "_data." + name + " = arena_push_array(g_entities.arena, false, " + typ + ", layout->" + entity + "_amount);\n"
+            if name == "amount" or name == "capacity": continue
+            entities_c += "    g_entities." + entity + "_data." + name + " = arena_push_array(g_entities.arena, false, " + typ + ", layout->" + entity + "_capacity);\n"
             entities_c += "    if (!g_entities." + entity + "_data." + name + ") {\n"
             entities_c += "      log_errorl(\"couldn't allocate " + entity + " " + name + " data\");\n"
             entities_c += "      return false;\n"
             entities_c += "    }\n"
         entities_c += "    " + entity + "_init(&g_entities." + entity + "_data);\n"
         entities_c += "  } else {\n"
-        entities_c += "    g_entities." + entity + "_data.amount = 0;\n"
+        entities_c += "    g_entities." + entity + "_data.capacity = 0;\n"
         entities_c += "  }\n"
     else:
         entities_c += "  if (layout->has_" + entity + ") {\n"
@@ -184,7 +192,7 @@ entities_c += "    return;\n"
 entities_c += "  }\n"
 entities_c += "#endif\n"
 for entity in entities_soa:
-    entities_c += "  if (g_entities." + entity + "_data.amount) " + entity + "_update(&g_entities." + entity + "_data, dt);\n"
+    entities_c += "  if (g_entities." + entity + "_data.capacity) " + entity + "_update(&g_entities." + entity + "_data, dt);\n"
 for entity in entities_unique:
     entities_c += "  if (g_entities." + entity + "_data) " + entity + "_update(g_entities." + entity + "_data, dt);\n"
 entities_c += "}\n\n"
@@ -196,7 +204,7 @@ entities_c += "    return;\n"
 entities_c += "  }\n"
 entities_c += "#endif\n"
 for entity in entities_soa:
-    entities_c += "  if (g_entities." + entity + "_data.amount) " + entity + "_render(&g_entities." + entity + "_data);\n"
+    entities_c += "  if (g_entities." + entity + "_data.capacity) " + entity + "_render(&g_entities." + entity + "_data);\n"
 for entity in entities_unique:
     entities_c += "  if (g_entities." + entity + "_data) " + entity + "_render(g_entities." + entity + "_data);\n"
 entities_c += "}\n"
