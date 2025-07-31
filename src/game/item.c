@@ -2,6 +2,7 @@
 #include "game/entities.h"
 #include "engine/window.h"
 #include "engine/core.h"
+#include "engine/utils.h"
 
 #define FOLLOW_SPEED 10.0f
 
@@ -19,6 +20,7 @@ item_init(struct item_data *self) {
 
 void
 item_update(struct item_data *self, float dt) {
+  if (!self->amount) return;
   bool interacting = window_is_key_press(K_A);
   auto player = entities_get_player_data();
   if (player->held_item >= 0) {
@@ -26,7 +28,27 @@ item_update(struct item_data *self, float dt) {
     self->position_target[i] = player->scale.x > 0.0f ? V2(player->position.x - player->size.x * 0.5f, player->position.y)
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
     if (interacting) {
+      static_assert(sizeof (struct item_data) == sizeof (void *) * 6 + 8, "update the items swap, missing fields or a field was removed");
       self->depth[i] = player->depth + 1.0f;
+      /* the code below is moving the current held item into the end of the list
+       * this may seem useless, but it's necessary to make you able to swap between multiple items */
+      auto position         = self->position[i];
+      auto texture_position = self->texture_position[i];
+      auto texture_size     = self->texture_size[i];
+      auto size             = self->size[i];
+      auto position_target  = self->position_target[i];
+      for (uint32_t j = i; j < self->amount - 1; j++) {
+        self->position[j]         = self->position[j + 1];
+        self->texture_position[j] = self->texture_position[j + 1];
+        self->texture_size[j]     = self->texture_size[j + 1];
+        self->size[j]             = self->size[j + 1];
+        self->position_target[j]  = self->position_target[j + 1];
+      }
+      self->position[self->amount - 1]         = position;
+      self->texture_position[self->amount - 1] = texture_position;
+      self->texture_size[self->amount - 1]     = texture_size;
+      self->size[self->amount - 1]             = size;
+      self->position_target[self->amount - 1]  = position_target;
       player->held_item = -1;
     }
   } else {
