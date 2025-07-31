@@ -48,6 +48,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate item depth data");
       return false;
     }
+    g_entities.item_data.flash = arena_push_array(g_entities.arena, false, float, layout->item_capacity);
+    if (!g_entities.item_data.flash) {
+      log_errorl("couldn't allocate item flash data");
+      return false;
+    }
     g_entities.item_data.size = arena_push_array(g_entities.arena, false, struct v2, layout->item_capacity);
     if (!g_entities.item_data.size) {
       log_errorl("couldn't allocate item size data");

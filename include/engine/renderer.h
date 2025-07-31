@@ -25,9 +25,9 @@ struct color { float r, g, b; };
 bool renderer_make(void);
 void renderer_submit(void);
 
-void renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const struct v2 origin[amount], const float angle[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount]);
+void renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]);
 
-void renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth);
+void renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth, float flash);
 
 #if DEV
 void renderer_request_circle(struct v2 position, float radius, struct color color, float opacity);
@@ -43,7 +43,8 @@ renderer_request_rect(struct v2 position, struct v2 size, struct color color, fl
     v2_mul(size, V2(UNIT_PER_PIXEL, UNIT_PER_PIXEL)),
     color,
     opacity,
-    depth
+    depth,
+    0.0f
   );
 }
 #endif

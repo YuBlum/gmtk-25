@@ -1,6 +1,6 @@
 [entity.unique.player]
 component = [ "renderable", "collidable" ]
-exclude   = [ "color", "opacity", "origin" ]
+exclude   = [ "color", "opacity", "origin", "flash" ]
 field.direction     = "struct v2"
 field.wiggle_cur    = "float"
 field.wiggle_target = "float"
@@ -23,6 +23,7 @@ angle            = "float"
 color            = "struct color"
 opacity          = "float"
 depth            = "float"
+flash            = "float"
 
 [component.collidable]
 position = "struct v2"

@@ -9,6 +9,7 @@ struct item_data {
   struct v2u *texture_position;
   struct v2u *texture_size;
   float *depth;
+  float *flash;
   struct v2 *size;
   struct v2 *position_target;
   struct v2 *launch_velocity;

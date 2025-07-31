@@ -17,6 +17,7 @@ struct vertex {
   struct v2    angle;
   struct color color;
   float        opacity;
+  float        flash;
 };
 
 #define QUAD_CAPACITY 10000
@@ -227,12 +228,14 @@ renderer_make(void) {
   glEnableVertexAttribArray(3);
   glEnableVertexAttribArray(4);
   glEnableVertexAttribArray(5);
+  glEnableVertexAttribArray(6);
   glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, position));
   glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, texcoord));
   glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, origin));
   glVertexAttribPointer(3, 2, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, angle));
   glVertexAttribPointer(4, 3, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, color));
   glVertexAttribPointer(5, 1, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, opacity));
+  glVertexAttribPointer(6, 1, GL_FLOAT, false, sizeof (struct vertex), (void *)offsetof (struct vertex, flash));
   log_infol("vao, vbo and ibo created successfully");
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
@@ -278,7 +281,7 @@ renderer_submit(void) {
 }
 
 void
-renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const struct v2 origin[amount], const float angle[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount]) {
+renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]) {
 #if DEV
   if (g_renderer.quads_amount + amount >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
@@ -286,20 +289,54 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
   }
 #endif
   struct v2 size_half, tpos, tsiz, cos_sin;
-  static_assert(sizeof (struct vertex) == sizeof (float) * 12);
+  static_assert(sizeof (struct vertex) == sizeof (float) * 13);
+#if DEV
+  if (!texture_sizes) {
+    log_errorlf("%s: 'texture_sizes' argument cannot be NULL", __func__);
+    return;
+  }
+#endif
   for (uint32_t i = 0; i < amount; i++) {
     size_half = V2(texture_sizes[i].x * 0.5f * UNIT_ONE_PIXEL, texture_sizes[i].y * 0.5f * UNIT_ONE_PIXEL);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].origin = v2_mul(v2_add(origin[i], V2(-size_half.x, -size_half.y)), scales[i]);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].origin = v2_mul(v2_add(origin[i], V2(+size_half.x, -size_half.y)), scales[i]);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].origin = v2_mul(v2_add(origin[i], V2(+size_half.x, +size_half.y)), scales[i]);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].origin = v2_mul(v2_add(origin[i], V2(-size_half.x, +size_half.y)), scales[i]);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].origin = V2(-size_half.x, -size_half.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].origin = V2(+size_half.x, -size_half.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].origin = V2(+size_half.x, +size_half.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].origin = V2(-size_half.x, +size_half.y);
   }
+  if (origins) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount+i].v[0].origin = v2_add(origins[i], g_renderer.vertices[g_renderer.quads_amount+i].v[0].origin);
+      g_renderer.vertices[g_renderer.quads_amount+i].v[1].origin = v2_add(origins[i], g_renderer.vertices[g_renderer.quads_amount+i].v[1].origin);
+      g_renderer.vertices[g_renderer.quads_amount+i].v[2].origin = v2_add(origins[i], g_renderer.vertices[g_renderer.quads_amount+i].v[2].origin);
+      g_renderer.vertices[g_renderer.quads_amount+i].v[3].origin = v2_add(origins[i], g_renderer.vertices[g_renderer.quads_amount+i].v[3].origin);
+    }
+  }
+  if (scales) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount+i].v[0].origin = v2_mul(scales[i], g_renderer.vertices[g_renderer.quads_amount+i].v[0].origin);
+      g_renderer.vertices[g_renderer.quads_amount+i].v[1].origin = v2_mul(scales[i], g_renderer.vertices[g_renderer.quads_amount+i].v[1].origin);
+      g_renderer.vertices[g_renderer.quads_amount+i].v[2].origin = v2_mul(scales[i], g_renderer.vertices[g_renderer.quads_amount+i].v[2].origin);
+      g_renderer.vertices[g_renderer.quads_amount+i].v[3].origin = v2_mul(scales[i], g_renderer.vertices[g_renderer.quads_amount+i].v[3].origin);
+    }
+  }
+#if DEV
+  if (!positions) {
+    log_errorlf("%s: 'positions' argument cannot be NULL", __func__);
+    return;
+  }
+#endif
   for (uint32_t i = 0; i < amount; i++) {
     g_renderer.vertices[g_renderer.quads_amount + i].v[0].position = positions[i];
     g_renderer.vertices[g_renderer.quads_amount + i].v[1].position = positions[i];
     g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = positions[i];
     g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = positions[i];
   }
+#if DEV
+  if (!texture_positions) {
+    log_errorlf("%s: 'texture_positions' argument cannot be NULL", __func__);
+    return;
+  }
+#endif
   for (uint32_t i = 0; i < amount; i++) {
     tpos = v2_muls(V2U_V2(texture_positions[i]), ATLAS_PIXEL);
     tsiz = v2_muls(V2U_V2(texture_sizes[i]), ATLAS_PIXEL);
@@ -308,48 +345,91 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
     g_renderer.vertices[g_renderer.quads_amount + i].v[2].texcoord = v2_add(tpos, V2(tsiz.x, 0.0f  ));
     g_renderer.vertices[g_renderer.quads_amount + i].v[3].texcoord = v2_add(tpos, V2(0.0f  , 0.0f  ));
   }
-  for (uint32_t i = 0; i < amount; i++) {
-    cos_sin = V2(cosf(angle[i]), sinf(angle[i]));
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].angle = positions[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].angle = positions[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].angle = positions[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].angle = positions[i];
+  if (angles) {
+    for (uint32_t i = 0; i < amount; i++) {
+      cos_sin = V2(cosf(angles[i]), sinf(angles[i]));
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].angle = cos_sin;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].angle = cos_sin;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].angle = cos_sin;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].angle = cos_sin;
+    }
+  } else {
+    cos_sin = V2(cosf(0.0f), sinf(0.0f));
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].angle = cos_sin;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].angle = cos_sin;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].angle = cos_sin;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].angle = cos_sin;
+    }
   }
-  for (uint32_t i = 0; i < amount; i++) {
-    cos_sin = V2(cosf(angle[i]), sinf(angle[i]));
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].angle = cos_sin;
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].angle = cos_sin;
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].angle = cos_sin;
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].angle = cos_sin;
+  if (colors) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].color = colors[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].color = colors[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].color = colors[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].color = colors[i];
+    }
+  } else {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].color = WHITE;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].color = WHITE;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].color = WHITE;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].color = WHITE;
+    }
   }
-  for (uint32_t i = 0; i < amount; i++) {
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].color = colors[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].color = colors[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].color = colors[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].color = colors[i];
+  if (opacities) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].opacity = opacities[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].opacity = opacities[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].opacity = opacities[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].opacity = opacities[i];
+    }
+  } else {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].opacity = 1.0f;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].opacity = 1.0f;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].opacity = 1.0f;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].opacity = 1.0f;
+    }
   }
-  for (uint32_t i = 0; i < amount; i++) {
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].opacity = opacities[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].opacity = opacities[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].opacity = opacities[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].opacity = opacities[i];
+  if (flashes) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].flash = flashes[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].flash = flashes[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].flash = flashes[i];
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].flash = flashes[i];
+    }
+  } else {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.vertices[g_renderer.quads_amount + i].v[0].flash = 0.0f;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[1].flash = 0.0f;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[2].flash = 0.0f;
+      g_renderer.vertices[g_renderer.quads_amount + i].v[3].flash = 0.0f;
+    }
   }
-  for (uint32_t i = 0; i < amount; i++) {
-    g_renderer.indices_to_sort[g_renderer.quads_amount + i].depth = depths[i];
-    g_renderer.indices_to_sort[g_renderer.quads_amount + i].start = (g_renderer.quads_amount + i) * 4;
+  if (depths) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].depth = depths[i];
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].start = (g_renderer.quads_amount + i) * 4;
+    }
+  } else {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].depth = 0.0f;
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].start = (g_renderer.quads_amount + i) * 4;
+    }
   }
   g_renderer.quads_amount += amount;
 }
 
 void
-renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth) {
+renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth, float flash) {
 #if DEV
   if (g_renderer.quads_amount + 1 >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
     return;
   }
 #endif
-  static_assert(sizeof (struct vertex) == sizeof (float) * 12);
+  static_assert(sizeof (struct vertex) == sizeof (float) * 13);
   struct v2 size_half = V2(texture_size.x * 0.5f * UNIT_ONE_PIXEL, texture_size.y * 0.5f * UNIT_ONE_PIXEL),
             tpos = v2_muls(V2U_V2(texture_position), ATLAS_PIXEL),
             tsiz = v2_muls(V2U_V2(texture_size), ATLAS_PIXEL),
@@ -379,6 +459,10 @@ renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2
   vertices[1].opacity = opacity;
   vertices[2].opacity = opacity;
   vertices[3].opacity = opacity;
+  vertices[0].flash = flash;
+  vertices[1].flash = flash;
+  vertices[2].flash = flash;
+  vertices[3].flash = flash;
   g_renderer.indices_to_sort[g_renderer.quads_amount].depth = depth;
   g_renderer.indices_to_sort[g_renderer.quads_amount].start = g_renderer.quads_amount * 4;
   g_renderer.quads_amount++;
@@ -392,7 +476,7 @@ renderer_request_circle(struct v2 position, float radius, struct color color, fl
     return;
   }
 #endif
-  static_assert(sizeof (struct vertex) == sizeof (float) * 12);
+  static_assert(sizeof (struct vertex) == sizeof (float) * 13);
   struct vertex *vertices = g_renderer.vertices_circle[g_renderer.circles_amount].v;
   vertices[0].position = v2_add(position, V2(-radius, -radius));
   vertices[1].position = v2_add(position, V2(+radius, -radius));

@@ -37,9 +37,7 @@ player_update(struct player_data *self, float dt) {
   if (moving) {
     if (self->wiggle_target == 0.0f) self->wiggle_target = WIGGLE;
     if ((self->wiggle_target > 0.0f && self->wiggle_cur >= WIGGLE_POS) ||
-      (self->wiggle_target < 0.0f && self->wiggle_cur <= WIGGLE_NEG)) {
-      self->wiggle_target *= -1.0f;
-    }
+        (self->wiggle_target < 0.0f && self->wiggle_cur <= WIGGLE_NEG)) self->wiggle_target *= -1.0f;
     if (direction.x) self->scale.x = signf(direction.x);
   } else {
     self->wiggle_target = 0.0f;
@@ -60,7 +58,8 @@ player_render(struct player_data *self) {
     self->scale,
     WHITE,
     1.0f,
-    self->depth
+    self->depth,
+    0.0f
   );
   renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
 }
