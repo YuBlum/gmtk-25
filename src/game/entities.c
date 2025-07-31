@@ -1,11 +1,13 @@
 #include "engine/arena.h"
 #include "game/entities.h"
 #include "game/item.h"
+#include "game/solid.h"
 #include "game/player.h"
 
 struct entities {
   struct arena *arena;
   struct item_data item_data;
+  struct solid_data solid_data;
   struct player_data *player_data;
 };
 
@@ -77,6 +79,23 @@ entities_layout_set(const struct entities_layout *layout) {
   } else {
     g_entities.item_data.capacity = 0;
   }
+  if (layout->solid_capacity) {
+    g_entities.solid_data.capacity = layout->solid_capacity;
+    g_entities.solid_data.amount   = 0;
+    g_entities.solid_data.position = arena_push_array(g_entities.arena, false, struct v2, layout->solid_capacity);
+    if (!g_entities.solid_data.position) {
+      log_errorl("couldn't allocate solid position data");
+      return false;
+    }
+    g_entities.solid_data.size = arena_push_array(g_entities.arena, false, struct v2, layout->solid_capacity);
+    if (!g_entities.solid_data.size) {
+      log_errorl("couldn't allocate solid size data");
+      return false;
+    }
+    solid_init(&g_entities.solid_data);
+  } else {
+    g_entities.solid_data.capacity = 0;
+  }
   if (layout->has_player) {
     g_entities.player_data = arena_push_type(g_entities.arena, false, struct player_data);
     if (!g_entities.player_data) {
@@ -99,6 +118,7 @@ entities_update(float dt) {
   }
 #endif
   if (g_entities.item_data.capacity) item_update(&g_entities.item_data, dt);
+  if (g_entities.solid_data.capacity) solid_update(&g_entities.solid_data, dt);
   if (g_entities.player_data) player_update(g_entities.player_data, dt);
 }
 
@@ -111,9 +131,18 @@ entities_render(void) {
   }
 #endif
   if (g_entities.item_data.capacity) item_render(&g_entities.item_data);
+  if (g_entities.solid_data.capacity) solid_render(&g_entities.solid_data);
   if (g_entities.player_data) player_render(g_entities.player_data);
 }
 
 struct player_data *entities_get_player_data(void) {
   return g_entities.player_data;
+}
+
+struct item_data *entities_get_item_data(void) {
+  return &g_entities.item_data;
+}
+
+struct solid_data *entities_get_solid_data(void) {
+  return &g_entities.solid_data;
 }

@@ -1,8 +1,6 @@
-#include "game/item.h"
 #include "game/entities.h"
 #include "engine/window.h"
 #include "engine/core.h"
-#include "engine/utils.h"
 
 #define FOLLOW_SPEED 14.0f
 #define LAUNCH_MIN_SPEED 0.1f

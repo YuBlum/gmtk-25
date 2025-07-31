@@ -1,4 +1,3 @@
-#include "game/player.h"
 #include "game/entities.h"
 #include "engine/window.h"
 
@@ -9,8 +8,15 @@
 #define WIGGLE_POS (+WIGGLE-WIGGLE_EPSILON)
 #define WIGGLE_NEG (-WIGGLE+WIGGLE_EPSILON)
 
+#if DEV
+bool show_colliders;
+#endif
+
 void
 player_init(struct player_data *self) {
+#if DEV
+  show_colliders = true;
+#endif
   self->texture_position = V2U(0, 0);
   self->texture_size     = V2U(16, 16);
   self->position         = V2(0.0f, 0.0f);
@@ -26,19 +32,51 @@ player_init(struct player_data *self) {
 
 void
 player_update(struct player_data *self, float dt) {
-  struct v2 direction = v2_unit(V2(
+#if DEV
+  if (window_is_key_press(K_B)) show_colliders = !show_colliders;
+#endif
+  /* movement */
+  struct v2 move_direction = v2_muls(v2_unit(V2(
     window_is_key_down(K_RIGHT) - window_is_key_down(K_LEFT),
     window_is_key_down(K_UP)    - window_is_key_down(K_DOWN)
-  ));
-  self->position.x += direction.x * SPEED * dt;
-  self->position.y += direction.y * SPEED * dt;
-  bool moving = direction.x != 0.0f || direction.y != 0.0f;
+  )), SPEED * dt);
+  struct v2 next_position = v2_add(self->position, move_direction),
+            next_x        = { next_position.x, self->position.y },
+            next_y        = { self->position.x, next_position.y };
+  auto solids = entities_get_solid_data();
+  int32_t collided_x = -1;
+  for (int32_t i = 0; i < (int32_t)solids->amount; i++) {
+    if (!check_rect_rect(next_x, self->size, solids->position[i], solids->size[i])) continue;
+    collided_x = i;
+    break;
+  }
+  if (collided_x != -1) {
+    move_direction.x = 0.0f;
+    float half       = self->position.x < solids->position[collided_x].x ? -0.5f : +0.5f;
+    float offset     = half * (solids->size[collided_x].x + self->size.x);
+    next_position.x  = solids->position[collided_x].x + offset;
+  }
+  int32_t collided_y = -1;
+  for (int32_t i = 0; i < (int32_t)solids->amount; i++) {
+    if (!check_rect_rect(next_y, self->size, solids->position[i], solids->size[i])) continue;
+    collided_y = i;
+    break;
+  }
+  if (collided_y != -1) {
+    move_direction.y = 0.0f;
+    float half       = self->position.y < solids->position[collided_y].y ? -0.5f : +0.5f;
+    float offset     = half * (solids->size[collided_y].y + self->size.y);
+    next_position.y  = solids->position[collided_y].y + offset;
+  }
+  self->position = next_position;
+  bool moving = move_direction.x != 0.0f || move_direction.y != 0.0f;
+  /* wiggle */
   self->wiggle_cur = lerp(self->wiggle_cur, self->wiggle_target, WIGGLE_SPEED * dt);
   if (moving) {
     if (self->wiggle_target == 0.0f) self->wiggle_target = WIGGLE;
     if ((self->wiggle_target > 0.0f && self->wiggle_cur >= WIGGLE_POS) ||
         (self->wiggle_target < 0.0f && self->wiggle_cur <= WIGGLE_NEG)) self->wiggle_target *= -1.0f;
-    if (direction.x) self->scale.x = signf(direction.x);
+    if (move_direction.x) self->scale.x = signf(move_direction.x);
   } else {
     self->wiggle_target = 0.0f;
     if ((self->wiggle_cur > 0.0f && self->wiggle_cur <=  WIGGLE_EPSILON) ||
@@ -61,5 +99,9 @@ player_render(struct player_data *self) {
     self->depth,
     0.0f
   );
+
+#if DEV
+  renderer_request_rect(self->position, self->size, RGB(1.0f, 0.0f, 1.0f), 0.4f, -100.0f);
+#endif
   //renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
 }

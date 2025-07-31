@@ -116,6 +116,8 @@ entities_h = "#ifndef __ENTITIES_H__\n"
 entities_h += "#define __ENTITIES_H__\n\n"
 for entity in entities_unique:
     entities_h += "#include \"game/" + entity + ".h\"\n"
+for entity in entities_soa:
+    entities_h += "#include \"game/" + entity + ".h\"\n"
 entities_h += "\nstruct entities_layout {\n"
 for entity in entities_soa:
     entities_h += "  uint32_t " + entity + "_capacity;\n"
@@ -127,6 +129,8 @@ entities_h += "bool entities_layout_set(const struct entities_layout *layout);\n
 entities_h += "void entities_update(float dt);\n"
 entities_h += "void entities_render(void);\n\n"
 for entity in entities_unique:
+    entities_h += "struct " + entity + "_data *entities_get_" + entity + "_data(void);\n"
+for entity in entities_soa:
     entities_h += "struct " + entity + "_data *entities_get_" + entity + "_data(void);\n"
 entities_h += "\n#endif/*__ENTITIES_H__*/\n"
 
@@ -211,6 +215,10 @@ entities_c += "}\n"
 for entity in entities_unique:
     entities_c += "\nstruct " + entity + "_data *entities_get_" + entity + "_data(void) {\n"
     entities_c += "  return g_entities." + entity + "_data;\n"
+    entities_c += "}\n"
+for entity in entities_soa:
+    entities_c += "\nstruct " + entity + "_data *entities_get_" + entity + "_data(void) {\n"
+    entities_c += "  return &g_entities." + entity + "_data;\n"
     entities_c += "}\n"
 
 #print(entities_c)
