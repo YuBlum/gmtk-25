@@ -49,20 +49,4 @@ static inline struct v2u v2u_subs(struct v2u v, uint32_t s) { return V2U(v.x-s, 
 static inline struct v2u v2u_muls(struct v2u v, uint32_t s) { return V2U(v.x*s, v.y*s); }
 static inline struct v2u v2u_divs(struct v2u v, uint32_t s) { return V2U(v.x/s, v.y/s); }
 
-static inline bool
-check_rect_rect(struct v2 p0, struct v2 s0, struct v2 p1, struct v2 s1) {
-  return p0.x - s0.x * 0.5f < p1.x + s1.x * 0.5f &&
-         p0.x + s0.x * 0.5f > p1.x - s1.x * 0.5f &&
-         p0.y - s0.y * 0.5f < p1.y + s1.y * 0.5f &&
-         p0.y + s0.y * 0.5f > p1.y - s1.y * 0.5f;
-}
-
-
-static inline bool
-check_rect_circle(struct v2 rp, struct v2 s, struct v2 cp, float r) {
-  struct v2 d = v2_sub(cp, V2(fmaxf(rp.x - s.x * 0.5f, fminf(cp.x, rp.x + s.x * 0.5f)),
-                              fmaxf(rp.y - s.y * 0.5f, fminf(cp.y, rp.y + s.y * 0.5f))));
-  return (d.x*d.x + d.y*d.y) <= r*r;
-}
-
 #endif/*__YMATH_H__*/

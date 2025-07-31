@@ -1,5 +1,6 @@
 #include "game/entities.h"
 #include "engine/window.h"
+#include "engine/collision.h"
 
 #define SPEED 10.0f
 #define WIGGLE 1.0f
@@ -51,9 +52,7 @@ player_update(struct player_data *self, float dt) {
   }
   if (collided_x != -1) {
     move_direction.x = 0.0f;
-    float half       = self->position.x < solids->position[collided_x].x ? -0.5f : +0.5f;
-    float offset     = half * (solids->size[collided_x].x + self->size.x);
-    next_position.x  = solids->position[collided_x].x + offset;
+    next_position.x = resolve_rect_rect_axis(self->position.x, self->size.x, solids->position[collided_x].x, solids->size[collided_x].x);
   }
   int32_t collided_y = -1;
   for (int32_t i = 0; i < (int32_t)solids->amount; i++) {
@@ -63,9 +62,7 @@ player_update(struct player_data *self, float dt) {
   }
   if (collided_y != -1) {
     move_direction.y = 0.0f;
-    float half       = self->position.y < solids->position[collided_y].y ? -0.5f : +0.5f;
-    float offset     = half * (solids->size[collided_y].y + self->size.y);
-    next_position.y  = solids->position[collided_y].y + offset;
+    next_position.y = resolve_rect_rect_axis(self->position.y, self->size.y, solids->position[collided_y].y, solids->size[collided_y].y);
   }
   self->position = next_position;
   bool moving = move_direction.x != 0.0f || move_direction.y != 0.0f;

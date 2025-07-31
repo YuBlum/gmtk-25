@@ -12,6 +12,7 @@ component = [ "renderable", "collidable" ]
 exclude   = [ "color", "opacity", "origin", "scale", "angle" ]
 field.position_target = "struct v2"
 field.launch_velocity = "struct v2"
+field.next_position   = "struct v2"
 field.flash_target    = "float"
 
 [entity.solid]

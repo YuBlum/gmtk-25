@@ -1,6 +1,7 @@
 #include "game/entities.h"
 #include "engine/window.h"
 #include "engine/core.h"
+#include "engine/collision.h"
 
 #define FOLLOW_SPEED 14.0f
 #define LAUNCH_MIN_SPEED 0.1f
@@ -35,10 +36,10 @@ item_update(struct item_data *self, float dt) {
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 8 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 9 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
-       * the 'launch_velocity' and 'position_target' fields don't need to be added to the swapping
+       * the 'launch_velocity', 'next_position' and 'position_target' fields don't need to be added to the swapping
        * 'depth' field also isn't needed because of the code line above */
     auto position         = self->position[i];
     auto sprite           = self->sprite[i];
@@ -100,7 +101,37 @@ item_update(struct item_data *self, float dt) {
   }
   for (uint32_t i = 0; i < self->amount; i++) {
     self->launch_velocity[i] = v2_lerp(self->launch_velocity[i], V2(0.0f, 0.0f), LAUNCH_DECREASE_SPEED * dt);
-    self->position[i] = v2_add(self->position[i], self->launch_velocity[i]);
+    self->next_position[i] = v2_add(self->position[i], self->launch_velocity[i]);
+  }
+  auto solids = entities_get_solid_data();
+  int32_t collided;
+  struct v2 next;
+  for (uint32_t i = 0; i < self->amount; i++) {
+    collided = -1;
+    next = V2(self->next_position[i].x, self->position[i].y);
+    for (int32_t j = 0; j < (int32_t)solids->amount; j++) {
+      if (!check_rect_rect(next, self->size[i], solids->position[j], solids->size[j])) continue;
+      collided = j;
+      break;
+    }
+    if (collided == -1) continue;
+    self->launch_velocity[i].x *= -1.0f;
+    self->next_position[i].x = resolve_rect_rect_axis(self->position[i].x,self->size[i].x, solids->position[collided].x,solids->size[collided].x);
+  }
+  for (uint32_t i = 0; i < self->amount; i++) {
+    collided = -1;
+    next = V2(self->position[i].x, self->next_position[i].y);
+    for (int32_t j = 0; j < (int32_t)solids->amount; j++) {
+      if (!check_rect_rect(next, self->size[i], solids->position[j], solids->size[j])) continue;
+      collided = j;
+      break;
+    }
+    if (collided == -1) continue;
+    self->launch_velocity[i].y *= -1.0f;
+    self->next_position[i].y = resolve_rect_rect_axis(self->position[i].y,self->size[i].y, solids->position[collided].y,solids->size[collided].y);
+  }
+  for (uint32_t i = 0; i < self->amount; i++) {
+    self->position[i] = self->next_position[i];
   }
 }
 

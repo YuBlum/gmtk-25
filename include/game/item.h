@@ -12,6 +12,7 @@ struct item_data {
   struct v2 *size;
   struct v2 *position_target;
   struct v2 *launch_velocity;
+  struct v2 *next_position;
   float *flash_target;
   uint32_t capacity;
   uint32_t amount;
