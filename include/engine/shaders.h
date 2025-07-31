@@ -9,9 +9,11 @@
 "layout (location=3) in vec2  a_angle;\n" \
 "layout (location=4) in vec3  a_color;\n" \
 "layout (location=5) in float a_opacity;\n" \
+"layout (location=6) in float a_flash;\n" \
 "\n" \
 "out vec2 v_texcoord;\n" \
 "out vec4 v_blend;\n" \
+"out float v_flash;\n" \
 "\n" \
 "uniform mat3 u_proj;\n" \
 "\n" \
@@ -24,12 +26,14 @@
 "  gl_Position = vec4(u_proj * vec3((transform * a_origin) + a_position, 0.0), 1.0);\n" \
 "  v_texcoord = a_texcoord;\n" \
 "  v_blend = vec4(a_color, a_opacity);\n" \
+"  v_flash = a_flash;\n" \
 "}\n")
 
 #define SH_DEFAULT_FRAG str_view_make_from_lit( \
 "#version 460 core\n" \
 "in vec2 v_texcoord;\n" \
 "in vec4 v_blend;\n" \
+"in float v_flash;\n" \
 "\n" \
 "out vec4 f_color;\n" \
 "\n" \
@@ -38,6 +42,7 @@
 "void\n" \
 "main() {\n" \
 "  f_color = texture(texture_atlas, v_texcoord) * v_blend;\n" \
+"  f_color.xyz = mix(f_color.xyz, vec3(1.0), v_flash);\n" \
 "}\n")
 
 #if DEV

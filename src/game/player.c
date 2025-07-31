@@ -5,9 +5,9 @@
 #define SPEED 10.0f
 #define WIGGLE 1.0f
 #define WIGGLE_SPEED 20.0f
-#define WIGGLE_EPISOLON 0.01f
-#define WIGGLE_POS (+WIGGLE-WIGGLE_EPISOLON)
-#define WIGGLE_NEG (-WIGGLE+WIGGLE_EPISOLON)
+#define WIGGLE_EPSILON 0.01f
+#define WIGGLE_POS (+WIGGLE-WIGGLE_EPSILON)
+#define WIGGLE_NEG (-WIGGLE+WIGGLE_EPSILON)
 
 void
 player_init(struct player_data *self) {
@@ -41,8 +41,8 @@ player_update(struct player_data *self, float dt) {
     if (direction.x) self->scale.x = signf(direction.x);
   } else {
     self->wiggle_target = 0.0f;
-    if ((self->wiggle_cur > 0.0f && self->wiggle_cur <=  WIGGLE_EPISOLON) ||
-        (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPISOLON)) self->wiggle_cur = 0.0f;
+    if ((self->wiggle_cur > 0.0f && self->wiggle_cur <=  WIGGLE_EPSILON) ||
+        (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPSILON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
 }
@@ -61,5 +61,5 @@ player_render(struct player_data *self) {
     self->depth,
     0.0f
   );
-  renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
+  //renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
 }
