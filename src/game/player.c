@@ -17,8 +17,7 @@ player_init(struct player_data *self) {
 #if DEV
   show_colliders = true;
 #endif
-  self->texture_position = V2U(0, 0);
-  self->texture_size     = V2U(16, 16);
+  self->sprite           = SPR_PLAYER_TEST;
   self->position         = V2(0.0f, 0.0f);
   self->size             = V2(1.0f, 1.0f);
   self->scale            = V2(1.0f, 1.0f);
@@ -73,7 +72,7 @@ player_update(struct player_data *self, float dt) {
   /* wiggle */
   self->wiggle_cur = lerp(self->wiggle_cur, self->wiggle_target, WIGGLE_SPEED * dt);
   if (moving) {
-    if (self->wiggle_target == 0.0f) self->wiggle_target = WIGGLE;
+    if (self->wiggle_target == 0.0f) self->wiggle_target = randf() < 0.5f ? WIGGLE : -WIGGLE;
     if ((self->wiggle_target > 0.0f && self->wiggle_cur >= WIGGLE_POS) ||
         (self->wiggle_target < 0.0f && self->wiggle_cur <= WIGGLE_NEG)) self->wiggle_target *= -1.0f;
     if (move_direction.x) self->scale.x = signf(move_direction.x);
@@ -89,8 +88,7 @@ void
 player_render(struct player_data *self) {
   renderer_request_quad(
     self->position,
-    self->texture_position,
-    self->texture_size,
+    self->sprite,
     V2(0.0f, 0.0f),
     self->angle,
     self->scale,

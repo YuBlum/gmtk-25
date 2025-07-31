@@ -7,8 +7,7 @@
 struct player_data {
   struct v2 position;
   struct v2 scale;
-  struct v2u texture_position;
-  struct v2u texture_size;
+  enum sprite sprite;
   float angle;
   float depth;
   struct v2 size;

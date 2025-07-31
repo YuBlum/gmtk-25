@@ -20,8 +20,7 @@ component = [ "collidable" ]
 [component.renderable]
 position         = "struct v2"
 scale            = "struct v2"
-texture_position = "struct v2u"
-texture_size     = "struct v2u"
+sprite           = "enum sprite"
 origin           = "struct v2"
 angle            = "float"
 color            = "struct color"

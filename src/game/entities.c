@@ -35,14 +35,9 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate item position data");
       return false;
     }
-    g_entities.item_data.texture_position = arena_push_array(g_entities.arena, false, struct v2u, layout->item_capacity);
-    if (!g_entities.item_data.texture_position) {
-      log_errorl("couldn't allocate item texture_position data");
-      return false;
-    }
-    g_entities.item_data.texture_size = arena_push_array(g_entities.arena, false, struct v2u, layout->item_capacity);
-    if (!g_entities.item_data.texture_size) {
-      log_errorl("couldn't allocate item texture_size data");
+    g_entities.item_data.sprite = arena_push_array(g_entities.arena, false, enum sprite, layout->item_capacity);
+    if (!g_entities.item_data.sprite) {
+      log_errorl("couldn't allocate item sprite data");
       return false;
     }
     g_entities.item_data.depth = arena_push_array(g_entities.arena, false, float, layout->item_capacity);

@@ -14,8 +14,7 @@ void
 item_init(struct item_data *self) {
   self->amount = self->capacity;
   for (size_t i = 0; i < self->amount; i++) {
-    self->texture_position[i] = V2U(16, 0);
-    self->texture_size[i]     = V2U(8, 8);
+    self->sprite[i]           = SPR_ITEM_TEST;
     self->position[i]         = V2(randf() * GAME_W - GAME_W * 0.5f, randf() * GAME_H - GAME_H * 0.5f);
     self->position_target[i]  = self->position[i];
     self->size[i]             = V2(0.5f, 0.5f);
@@ -36,28 +35,25 @@ item_update(struct item_data *self, float dt) {
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 9 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 8 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity' and 'position_target' fields don't need to be added to the swapping
        * 'depth' field also isn't needed because of the code line above */
     auto position         = self->position[i];
-    auto texture_position = self->texture_position[i];
-    auto texture_size     = self->texture_size[i];
+    auto sprite           = self->sprite[i];
     auto size             = self->size[i];
     auto flash            = self->flash[i];
     auto flash_target     = self->flash_target[i];
     for (uint32_t j = i; j < self->amount - 1; j++) {
       self->position[j]         = self->position[j + 1];
-      self->texture_position[j] = self->texture_position[j + 1];
-      self->texture_size[j]     = self->texture_size[j + 1];
+      self->sprite[j]           = self->sprite[j + 1];
       self->size[j]             = self->size[j + 1];
       self->flash[j]            = self->flash[j + 1];
       self->flash_target[j]     = self->flash_target[j + 1];
     }
     self->position[self->amount - 1]         = position;
-    self->texture_position[self->amount - 1] = texture_position;
-    self->texture_size[self->amount - 1]     = texture_size;
+    self->sprite[self->amount - 1]           = sprite;
     self->size[self->amount - 1]             = size;
     self->flash[self->amount - 1]            = flash;
     self->flash_target[self->amount - 1]     = flash_target;
@@ -113,8 +109,7 @@ item_render(struct item_data *self) {
   renderer_request_quads(
     self->amount,
     self->position,
-    self->texture_position,
-    self->texture_size,
+    self->sprite,
     0, 0, 0, 0, 0,
     self->depth,
     self->flash

@@ -9,6 +9,7 @@
 #include "engine/string.h"
 #include "engine/shaders.h"
 #include "engine/renderer.h"
+#include "engine/atlas.h"
 
 struct vertex {
   struct v2    position;
@@ -184,34 +185,11 @@ renderer_make(void) {
   }
   log_infol("created circle shader");
 #endif
-  int texture_atlas_width, texture_atlas_height, texture_atlas_channels;
-  uint8_t *texture_atlas_data = stbi_load(
-    "assets/atlas.png",
-    &texture_atlas_width,
-    &texture_atlas_height,
-    &texture_atlas_channels,
-    4
-  );
-#ifdef DEV
-  if (!texture_atlas_data) {
-    log_errorl("couldn't load texture atlas");
-    return false;
-  }
-  if (texture_atlas_width != ATLAS_SIZE) {
-    log_errorlf("texture atlas width (%d) is not equal to ATLAS_SIZE (%u)", texture_atlas_width, ATLAS_SIZE);
-    return false;
-  }
-  if (texture_atlas_height != ATLAS_SIZE) {
-    log_errorlf("texture atlas height (%d) is not equal to ATLAS_SIZE (%u)", texture_atlas_height, ATLAS_SIZE);
-    return false;
-  }
-#endif
   glGenTextures(1, &g_renderer.texture_atlas);
   glBindTexture(GL_TEXTURE_2D, g_renderer.texture_atlas);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ATLAS_SIZE, ATLAS_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_atlas_data);
-  stbi_image_free(texture_atlas_data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ATLAS_WIDTH, ATLAS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlas_data);
   log_infol("loaded texture atlas");
   uint32_t vao, vbo, ibo;
   glGenVertexArrays(1, &vao);
@@ -281,27 +259,32 @@ renderer_submit(void) {
 }
 
 void
-renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const struct v2u texture_positions[amount], const struct v2u texture_sizes[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]) {
+renderer_request_quads(uint32_t amount, const struct v2 positions[amount], enum sprite sprites[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]) {
 #if DEV
   if (g_renderer.quads_amount + amount >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
     return;
   }
 #endif
-  struct v2 size_half, tpos, tsiz, cos_sin;
+  struct v2 hsiz, tpos, tsiz, cos_sin;
   static_assert(sizeof (struct vertex) == sizeof (float) * 13);
 #if DEV
-  if (!texture_sizes) {
-    log_errorlf("%s: 'texture_sizes' argument cannot be NULL", __func__);
+  if (!sprites) {
+    log_errorlf("%s: 'sprites' argument cannot be NULL", __func__);
+    return;
+  }
+  for (uint32_t i = 0; i < amount; i++) {
+    if (sprites[i] < SPRITES_AMOUNT) continue;
+    log_warnlf("%s: passed sprite at index '%d', has invalid sprite number '%d' exists", __func__, i, sprites[i]);
     return;
   }
 #endif
   for (uint32_t i = 0; i < amount; i++) {
-    size_half = V2(texture_sizes[i].x * 0.5f * UNIT_ONE_PIXEL, texture_sizes[i].y * 0.5f * UNIT_ONE_PIXEL);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].origin = V2(-size_half.x, -size_half.y);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].origin = V2(+size_half.x, -size_half.y);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].origin = V2(+size_half.x, +size_half.y);
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].origin = V2(-size_half.x, +size_half.y);
+    hsiz = atlas_sprite_half_sizes[sprites[i]];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].origin = V2(-hsiz.x, -hsiz.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].origin = V2(+hsiz.x, -hsiz.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].origin = V2(+hsiz.x, +hsiz.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].origin = V2(-hsiz.x, +hsiz.y);
   }
   if (origins) {
     for (uint32_t i = 0; i < amount; i++) {
@@ -331,15 +314,9 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
     g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = positions[i];
     g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = positions[i];
   }
-#if DEV
-  if (!texture_positions) {
-    log_errorlf("%s: 'texture_positions' argument cannot be NULL", __func__);
-    return;
-  }
-#endif
   for (uint32_t i = 0; i < amount; i++) {
-    tpos = v2_muls(V2U_V2(texture_positions[i]), ATLAS_PIXEL);
-    tsiz = v2_muls(V2U_V2(texture_sizes[i]), ATLAS_PIXEL);
+    tpos = atlas_sprite_positions[sprites[i]];
+    tsiz = atlas_sprite_sizes[sprites[i]];
     g_renderer.vertices[g_renderer.quads_amount + i].v[0].texcoord = v2_add(tpos, V2(0.0f  , tsiz.y));
     g_renderer.vertices[g_renderer.quads_amount + i].v[1].texcoord = v2_add(tpos, V2(tsiz.x, tsiz.y));
     g_renderer.vertices[g_renderer.quads_amount + i].v[2].texcoord = v2_add(tpos, V2(tsiz.x, 0.0f  ));
@@ -422,17 +399,21 @@ renderer_request_quads(uint32_t amount, const struct v2 positions[amount], const
 }
 
 void
-renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth, float flash) {
+renderer_request_quad(struct v2 position, enum sprite sprite, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth, float flash) {
 #if DEV
   if (g_renderer.quads_amount + 1 >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
     return;
   }
+  if (sprite >= SPRITES_AMOUNT) {
+    log_warnlf("%s: sprite with number '%d' doesn't exists", __func__, sprite);
+    return;
+  }
 #endif
   static_assert(sizeof (struct vertex) == sizeof (float) * 13);
-  struct v2 size_half = V2(texture_size.x * 0.5f * UNIT_ONE_PIXEL, texture_size.y * 0.5f * UNIT_ONE_PIXEL),
-            tpos = v2_muls(V2U_V2(texture_position), ATLAS_PIXEL),
-            tsiz = v2_muls(V2U_V2(texture_size), ATLAS_PIXEL),
+  struct v2 hsiz = atlas_sprite_half_sizes[sprite],
+            tpos = atlas_sprite_positions[sprite],
+            tsiz = atlas_sprite_sizes[sprite],
             cos_sin = { cosf(angle), sinf(angle) };
   struct vertex *vertices = g_renderer.vertices[g_renderer.quads_amount].v;
   vertices[0].position = position;
@@ -443,10 +424,10 @@ renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2
   vertices[1].texcoord = v2_add(tpos, V2(tsiz.x, tsiz.y));
   vertices[2].texcoord = v2_add(tpos, V2(tsiz.x, 0.0f  ));
   vertices[3].texcoord = v2_add(tpos, V2(0.0f  , 0.0f  ));
-  vertices[0].origin = v2_mul(v2_add(origin, V2(-size_half.x, -size_half.y)), scale);
-  vertices[1].origin = v2_mul(v2_add(origin, V2(+size_half.x, -size_half.y)), scale);
-  vertices[2].origin = v2_mul(v2_add(origin, V2(+size_half.x, +size_half.y)), scale);
-  vertices[3].origin = v2_mul(v2_add(origin, V2(-size_half.x, +size_half.y)), scale);
+  vertices[0].origin = v2_mul(v2_add(origin, V2(-hsiz.x, -hsiz.y)), scale);
+  vertices[1].origin = v2_mul(v2_add(origin, V2(+hsiz.x, -hsiz.y)), scale);
+  vertices[2].origin = v2_mul(v2_add(origin, V2(+hsiz.x, +hsiz.y)), scale);
+  vertices[3].origin = v2_mul(v2_add(origin, V2(-hsiz.x, +hsiz.y)), scale);
   vertices[0].angle = cos_sin;
   vertices[1].angle = cos_sin;
   vertices[2].angle = cos_sin;
@@ -495,4 +476,19 @@ renderer_request_circle(struct v2 position, float radius, struct color color, fl
   vertices[2].opacity = opacity;
   vertices[3].opacity = opacity;
   g_renderer.circles_amount++;
+}
+
+void
+renderer_request_rect(struct v2 position, struct v2 size, struct color color, float opacity, float depth) {
+  renderer_request_quad(
+    position,
+    SPR_PIXEL,
+    V2(0.0f, 0.0f),
+    0.0f,
+    v2_mul(size, V2(UNIT_PER_PIXEL, UNIT_PER_PIXEL)),
+    color,
+    opacity,
+    depth,
+    0.0f
+  );
 }
