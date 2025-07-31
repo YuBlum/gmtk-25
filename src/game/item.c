@@ -5,7 +5,8 @@
 #include "engine/utils.h"
 
 #define FOLLOW_SPEED 14.0f
-#define LAUNCH_MAX_SPEED 0.4f
+#define LAUNCH_MIN_SPEED 0.1f
+#define LAUNCH_MAX_SPEED 0.25f
 #define LAUNCH_DECREASE_SPEED 10.0f
 #define FLASH_TARGET 0.7f
 #define FLASH_SPEED 8.0f
@@ -38,7 +39,6 @@ item_update(struct item_data *self, float dt) {
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
     static_assert(sizeof (struct item_data) == sizeof (void *) * 9 + 8, "update the items swap, missing fields or a field was removed");
-    self->depth[i] = player->depth + 1.0f;
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity' and 'position_target' fields don't need to be added to the swapping
@@ -64,8 +64,14 @@ item_update(struct item_data *self, float dt) {
     self->flash[self->amount - 1]            = flash;
     self->flash_target[self->amount - 1]     = flash_target;
     self->position_target[self->amount - 1]  = position;
-    self->launch_velocity[self->amount - 1]  = V2(randf() * LAUNCH_MAX_SPEED - LAUNCH_MAX_SPEED * 0.5f,
-                                                  randf() * LAUNCH_MAX_SPEED - LAUNCH_MAX_SPEED * 0.5f);
+    float launch_angle;
+    if (player->scale.x < 0.0f) {
+      launch_angle = randf() < 0.5f ? randf() * (PI/3.0f) + 5.0f*PI/3.0f : randf() * (PI/3.0f); // between 60 and 300 degrees (forward arc)
+    } else {
+      launch_angle = randf() * (2.0f*PI/3.0f) + 2.0f*PI/3.0f; // between 120 and 240 degrees
+    }
+    self->launch_velocity[self->amount - 1]  = v2_muls(V2(cosf(launch_angle), sinf(launch_angle)),
+                                                       randf() * (LAUNCH_MAX_SPEED-LAUNCH_MIN_SPEED) + LAUNCH_MIN_SPEED);
     player->held_item = -1;
     return;
   }
@@ -86,9 +92,11 @@ item_update(struct item_data *self, float dt) {
     for (uint32_t i = 0; i < self->amount; i++) {
       if (!check_rect_circle(self->position[i], self->size[i], player->position, player->interact_rad) || found_target) {
         self->flash_target[i] = 0.0f;
+        self->depth[i] = player->depth + i * 0.1f;
       } else {
         if (self->flash_target[i] == 0.0f && self->flash[i] <= 0.0f+FLASH_EPSILON) self->flash_target[i] = FLASH_TARGET;
         else if (self->flash_target[i] > 0.0f && self->flash[i] >= FLASH_TARGET-FLASH_EPSILON) self->flash_target[i] = 0.0f;
+        self->depth[i] = player->depth + 0.01f;
         found_target = true;
       }
     }
