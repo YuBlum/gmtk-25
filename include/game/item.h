@@ -9,6 +9,8 @@ struct item_data {
   struct v2u texture_position;
   struct v2u texture_size;
   struct v2 size;
+  struct v2 position_target;
+  bool being_held;
 };
 
 void item_init(struct item_data *self);

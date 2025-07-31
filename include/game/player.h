@@ -15,6 +15,7 @@ struct player_data {
   struct v2 direction;
   float wiggle_cur;
   float wiggle_target;
+  float interact_rad;
 };
 
 void player_init(struct player_data *self);

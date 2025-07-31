@@ -29,7 +29,7 @@ static inline float v2_dot(struct v2 v0, struct v2 v1) { return v0.x*v1.x + v0.y
 static inline float v2_magsq(struct v2 v) { return v.x*v.x + v.y*v.y; }
 static inline float v2_mag(struct v2 v) { return sqrt(v.x*v.x + v.y*v.y); }
 static inline struct v2 v2_unit(struct v2 v) { float mag = sqrt(v.x*v.x + v.y*v.y); return mag == 0.0f ? V2S(0.0f) : V2(v.x/mag, v.y/mag); }
-static inline struct v2 v2_lerp(struct v2 a, struct v2 b, float t) { return V2(lerp(a.x, b.x, t), lerp(b.y, b.y, t)); }
+static inline struct v2 v2_lerp(struct v2 a, struct v2 b, float t) { return V2(lerp(a.x, b.x, t), lerp(a.y, b.y, t)); }
 
 static inline bool v2_intersect(struct v2 p0, struct v2 s0, struct v2 p1, struct v2 s1) { return p0.x - s0.x * 0.5f < p1.x + s1.x * 0.5f &&
                                                                                                  p0.x + s0.x * 0.5f > p1.x - s1.x * 0.5f &&

@@ -40,10 +40,19 @@ struct renderer {
   struct quad_vertices vertices[QUAD_CAPACITY];
   struct quad_indices indices[QUAD_CAPACITY];
   struct index_sort indices_to_sort[QUAD_CAPACITY];
+#if DEV
+  struct quad_vertices vertices_circle[QUAD_CAPACITY];
+  struct quad_indices indices_circle[QUAD_CAPACITY];
+  uint32_t circles_amount;
+#endif
   uint32_t quads_amount;
   uint32_t sh_default;
   int32_t  sh_default_proj;
   uint32_t texture_atlas;
+#if DEV
+  uint32_t sh_circle;
+  int32_t  sh_circle_proj;
+#endif
 };
 
 static struct renderer g_renderer;
@@ -142,10 +151,7 @@ renderer_make(void) {
   log_infol("making renderer...");
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
   log_infol("loaded opengl functions");
-  g_renderer.sh_default = shader_program_make(
-    &SH_DEFAULT_VERT,
-    &SH_DEFAULT_FRAG
-  );
+  g_renderer.sh_default = shader_program_make(&SH_DEFAULT_VERT, &SH_DEFAULT_FRAG);
   if (!g_renderer.sh_default) return false;
   g_renderer.sh_default_proj = glGetUniformLocation(g_renderer.sh_default, "u_proj");
 #if DEV
@@ -157,6 +163,26 @@ renderer_make(void) {
   glUseProgram(g_renderer.sh_default);
   glUniformMatrix3fv(g_renderer.sh_default_proj, 1, false, g_projection);
   log_infol("created default shader");
+#if DEV
+  g_renderer.sh_circle = shader_program_make(&SH_CIRCLE_VERT, &SH_CIRCLE_FRAG);
+  if (!g_renderer.sh_circle) return false;
+  g_renderer.sh_circle_proj = glGetUniformLocation(g_renderer.sh_circle, "u_proj");
+  if (g_renderer.sh_circle_proj < 0) {
+    log_errorl("couldn't get 'u_proj' location from circle shader");
+    return false;
+  }
+  glUseProgram(g_renderer.sh_circle);
+  glUniformMatrix3fv(g_renderer.sh_circle_proj, 1, false, g_projection);
+  for (uint32_t i = 0; i < QUAD_CAPACITY; i++) {
+    g_renderer.indices_circle[i].i[0] = (i * 4) + 0;
+    g_renderer.indices_circle[i].i[1] = (i * 4) + 1;
+    g_renderer.indices_circle[i].i[2] = (i * 4) + 2;
+    g_renderer.indices_circle[i].i[3] = (i * 4) + 2;
+    g_renderer.indices_circle[i].i[4] = (i * 4) + 3;
+    g_renderer.indices_circle[i].i[5] = (i * 4) + 0;
+  }
+  log_infol("created circle shader");
+#endif
   int texture_atlas_width, texture_atlas_height, texture_atlas_channels;
   uint8_t *texture_atlas_data = stbi_load(
     "assets/atlas.png",
@@ -237,10 +263,18 @@ renderer_submit(void) {
   }
   glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  glUseProgram(g_renderer.sh_default);
   glBufferSubData(GL_ARRAY_BUFFER, 0, g_renderer.quads_amount * sizeof (struct quad_vertices), g_renderer.vertices);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, g_renderer.quads_amount * sizeof (struct quad_indices), g_renderer.indices);
   glDrawElements(GL_TRIANGLES, g_renderer.quads_amount * 6, GL_UNSIGNED_INT, 0);
   g_renderer.quads_amount = 0;
+#if DEV
+  glUseProgram(g_renderer.sh_circle);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, g_renderer.circles_amount * sizeof (struct quad_vertices), g_renderer.vertices_circle);
+  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, g_renderer.circles_amount * sizeof (struct quad_indices), g_renderer.indices_circle);
+  glDrawElements(GL_TRIANGLES, g_renderer.circles_amount * 6, GL_UNSIGNED_INT, 0);
+  g_renderer.circles_amount = 0;
+#endif
 }
 
 void
@@ -348,4 +382,33 @@ renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2
   g_renderer.indices_to_sort[g_renderer.quads_amount].depth = depth;
   g_renderer.indices_to_sort[g_renderer.quads_amount].start = g_renderer.quads_amount * 4;
   g_renderer.quads_amount++;
+}
+
+void
+renderer_request_circle(struct v2 position, float radius, struct color color, float opacity) {
+#if DEV
+  if (g_renderer.circles_amount + 1 >= QUAD_CAPACITY) {
+    log_warnlf("%s: trying to request to much circles for rendering. increase QUAD_CAPACITY", __func__);
+    return;
+  }
+#endif
+  static_assert(sizeof (struct vertex) == sizeof (float) * 12);
+  struct vertex *vertices = g_renderer.vertices_circle[g_renderer.circles_amount].v;
+  vertices[0].position = v2_add(position, V2(-radius, -radius));
+  vertices[1].position = v2_add(position, V2(+radius, -radius));
+  vertices[2].position = v2_add(position, V2(+radius, +radius));
+  vertices[3].position = v2_add(position, V2(-radius, +radius));
+  vertices[0].origin = V2(-1.0f, -1.0f); /* treating the 'origin' like normalized coordinates */
+  vertices[1].origin = V2(+1.0f, -1.0f); /* treating the 'origin' like normalized coordinates */
+  vertices[2].origin = V2(+1.0f, +1.0f); /* treating the 'origin' like normalized coordinates */
+  vertices[3].origin = V2(-1.0f, +1.0f); /* treating the 'origin' like normalized coordinates */
+  vertices[0].color = color;
+  vertices[1].color = color;
+  vertices[2].color = color;
+  vertices[3].color = color;
+  vertices[0].opacity = opacity;
+  vertices[1].opacity = opacity;
+  vertices[2].opacity = opacity;
+  vertices[3].opacity = opacity;
+  g_renderer.circles_amount++;
 }

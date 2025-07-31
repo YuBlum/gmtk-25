@@ -29,6 +29,9 @@ void renderer_request_quads(uint32_t amount, const struct v2 positions[amount], 
 
 void renderer_request_quad(struct v2 position, struct v2u texture_position, struct v2u texture_size, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth);
 
+#if DEV
+void renderer_request_circle(struct v2 position, float radius, struct color color, float opacity);
+
 static inline void
 renderer_request_rect(struct v2 position, struct v2 size, struct color color, float opacity, float depth) {
   renderer_request_quad(
@@ -43,5 +46,6 @@ renderer_request_rect(struct v2 position, struct v2 size, struct color color, fl
     depth
   );
 }
+#endif
 
 #endif/*__RENDERER_H__*/
