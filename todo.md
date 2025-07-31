@@ -1,0 +1,10 @@
+- [ ] Walls
+- [ ] Boxes
+- [ ] Door
+- [ ] Pass to next room state
+- [ ] Design items
+- [ ] Item usage
+- [ ] Design exit route
+- [ ] Art
+- [ ] Sfx
+- [ ] Ending

@@ -61,5 +61,5 @@ player_render(struct player_data *self) {
     self->depth,
     0.0f
   );
-  renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
+  //renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
 }
