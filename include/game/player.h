@@ -8,9 +8,10 @@ struct player_data {
   struct v2 position;
   struct v2 scale;
   struct v2u texture_position;
-  struct v2 pivot;
+  struct v2u texture_size;
   float angle;
   float depth;
+  struct v2 size;
   struct v2 direction;
   float wiggle_cur;
   float wiggle_target;

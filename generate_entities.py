@@ -42,6 +42,10 @@ def add_entity(entity, body, soa):
                 print("trying to include undefined component '", ent_comp, "' in entity '", entity, "'", sep="")
                 exit(1)
             for name, typ in toml["component"][ent_comp].items():
+                if name in entities_ir[entity]:
+                    if entities_ir[entity][name] != typ:
+                        print("trying to insert field '", name, "' with type '", typ, "', but entity '", entity, "' already has this field as the type '", entities_ir[entity][name], "'", sep="")
+                        exit(1)
                 if (name in entities_ir[entity]) or ("exclude" in body and name in body["exclude"]): continue
                 entities_ir[entity][name] = typ
     if "field" in body:
@@ -103,7 +107,9 @@ for entity in entities_all:
 
 entities_h = "#ifndef __ENTITIES_H__\n"
 entities_h += "#define __ENTITIES_H__\n\n"
-entities_h += "struct entities_layout {\n"
+for entity in entities_unique:
+    entities_h += "#include \"game/" + entity + ".h\"\n"
+entities_h += "\nstruct entities_layout {\n"
 for entity in entities_soa:
     entities_h += "  uint32_t " + entity + "_amount;\n"
 for entity in entities_unique:
@@ -112,7 +118,9 @@ entities_h += "};\n\n"
 entities_h += "bool entities_make(void);\n"
 entities_h += "bool entities_layout_set(const struct entities_layout *layout);\n"
 entities_h += "void entities_update(float dt);\n"
-entities_h += "void entities_render(void);\n"
+entities_h += "void entities_render(void);\n\n"
+for entity in entities_unique:
+    entities_h += "struct " + entity + "_data *entities_get_" + entity + "_data(void);\n"
 entities_h += "\n#endif/*__ENTITIES_H__*/\n"
 
 #print(entities_h)
@@ -192,6 +200,10 @@ for entity in entities_soa:
 for entity in entities_unique:
     entities_c += "  if (g_entities." + entity + "_data) " + entity + "_render(g_entities." + entity + "_data);\n"
 entities_c += "}\n"
+for entity in entities_unique:
+    entities_c += "\nstruct " + entity + "_data *entities_get_" + entity + "_data(void) {\n"
+    entities_c += "  return g_entities." + entity + "_data;\n"
+    entities_c += "}\n"
 
 #print(entities_c)
 

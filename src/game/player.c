@@ -1,7 +1,8 @@
 #include "game/player.h"
+#include "game/entities.h"
 #include "engine/window.h"
 
-#define SPEED 10.0f
+#define SPEED 5.0f
 #define WIGGLE 1.0f
 #define WIGGLE_SPEED 20.0f
 #define WIGGLE_EPISOLON 0.01f
@@ -11,11 +12,14 @@
 void
 player_init(struct player_data *self) {
   self->texture_position = V2U(0, 0);
+  self->texture_size     = V2U(16, 16);
   self->position         = V2(0.0f, 0.0f);
+  self->size             = V2(1.0f, 1.0f);
   self->scale            = V2(1.0f, 1.0f);
   self->angle            = 0.0f;
   self->wiggle_cur       = 0.0f;
   self->wiggle_target    = 0.0f;
+  self->depth            = 0.0f;
 }
 
 void
@@ -45,26 +49,26 @@ player_update(struct player_data *self, float dt) {
 
 void
 player_render(struct player_data *self) {
+  #if 0
   renderer_request_quad(
     self->position,
     self->texture_position,
-    V2U(16, 16),
-    V2(-0.125f, -0.125f),
-    self->angle,
-    self->scale,
-    BLACK,
-    0.4f,
-    1.0f
-  );
-  renderer_request_quad(
-    self->position,
-    self->texture_position,
-    V2U(16, 16),
+    self->texture_size,
     V2(0.0f, 0.0f),
     self->angle,
     self->scale,
     WHITE,
     1.0f,
-    0.0f
+    self->depth
+  );
+  #endif
+
+  struct item_data *item = entities_get_item_data();
+  renderer_request_rect(
+    self->position,
+    self->size,
+    v2_intersect(self->position, self->size, item->position, item->size) ? GREEN : RED,
+    0.2f,
+    self->depth - 0.1f
   );
 }
