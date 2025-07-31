@@ -58,6 +58,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate item position_target data");
       return false;
     }
+    g_entities.item_data.launch_velocity = arena_push_array(g_entities.arena, false, struct v2, layout->item_capacity);
+    if (!g_entities.item_data.launch_velocity) {
+      log_errorl("couldn't allocate item launch_velocity data");
+      return false;
+    }
     item_init(&g_entities.item_data);
   } else {
     g_entities.item_data.capacity = 0;

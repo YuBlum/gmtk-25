@@ -5,6 +5,8 @@
 #include "engine/utils.h"
 
 #define FOLLOW_SPEED 10.0f
+#define LAUNCH_MAX_SPEED 0.4f
+#define LAUNCH_DECREASE_SPEED 10.0f
 
 void
 item_init(struct item_data *self) {
@@ -15,6 +17,7 @@ item_init(struct item_data *self) {
     self->position[i]         = V2(randf() * GAME_W - GAME_W * 0.5f, randf() * GAME_H - GAME_H * 0.5f);
     self->position_target[i]  = self->position[i];
     self->size[i]             = V2(0.5f, 0.5f);
+    self->launch_velocity[i]  = V2(0.0f, 0.0f);
   }
 }
 
@@ -27,16 +30,17 @@ item_update(struct item_data *self, float dt) {
     int32_t i = player->held_item;
     self->position_target[i] = player->scale.x > 0.0f ? V2(player->position.x - player->size.x * 0.5f, player->position.y)
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
+    self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (interacting) {
-      static_assert(sizeof (struct item_data) == sizeof (void *) * 6 + 8, "update the items swap, missing fields or a field was removed");
+      static_assert(sizeof (struct item_data) == sizeof (void *) * 7 + 8, "update the items swap, missing fields or a field was removed");
       self->depth[i] = player->depth + 1.0f;
       /* the code below is moving the current held item into the end of the list
-       * this may seem useless, but it's necessary to make you able to swap between multiple items */
+       * this may seem useless, but it's necessary to make you able to swap between multiple items
+       * the 'launch_velocity' and 'position_target' fields don't need to be added to the swapping */
       auto position         = self->position[i];
       auto texture_position = self->texture_position[i];
       auto texture_size     = self->texture_size[i];
       auto size             = self->size[i];
-      auto position_target  = self->position_target[i];
       for (uint32_t j = i; j < self->amount - 1; j++) {
         self->position[j]         = self->position[j + 1];
         self->texture_position[j] = self->texture_position[j + 1];
@@ -48,20 +52,24 @@ item_update(struct item_data *self, float dt) {
       self->texture_position[self->amount - 1] = texture_position;
       self->texture_size[self->amount - 1]     = texture_size;
       self->size[self->amount - 1]             = size;
-      self->position_target[self->amount - 1]  = position_target;
+      self->position_target[self->amount - 1]  = position;
+      self->launch_velocity[self->amount - 1]  = V2(randf() * LAUNCH_MAX_SPEED - LAUNCH_MAX_SPEED * 0.5f,
+                                                    randf() * LAUNCH_MAX_SPEED - LAUNCH_MAX_SPEED * 0.5f);
       player->held_item = -1;
     }
   } else {
     for (uint32_t i = 0; interacting && i < self->amount; i++) {
       if (check_rect_circle(self->position[i], self->size[i], player->position, player->interact_rad)) {
         self->depth[i] = player->depth - 1.0f;
+        self->launch_velocity[i] = V2(0.0f, 0.0f);
         player->held_item = i;
         break;
       }
     }
   }
   for (uint32_t i = 0; i < self->amount; i++) {
-    self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
+    self->launch_velocity[i] = v2_lerp(self->launch_velocity[i], V2(0.0f, 0.0f), LAUNCH_DECREASE_SPEED * dt);
+    self->position[i] = v2_add(self->position[i], self->launch_velocity[i]);
   }
 }
 

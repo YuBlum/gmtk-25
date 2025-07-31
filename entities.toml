@@ -11,6 +11,7 @@ field.held_item     = "int32_t"
 component = [ "renderable", "collidable" ]
 exclude   = [ "color", "opacity", "origin", "scale", "angle" ]
 field.position_target = "struct v2"
+field.launch_velocity = "struct v2"
 
 [component.renderable]
 position         = "struct v2"

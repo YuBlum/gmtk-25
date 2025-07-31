@@ -11,6 +11,7 @@ struct item_data {
   float *depth;
   struct v2 *size;
   struct v2 *position_target;
+  struct v2 *launch_velocity;
   uint32_t capacity;
   uint32_t amount;
 };
