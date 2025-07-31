@@ -20,7 +20,7 @@ player_init(struct player_data *self) {
   self->wiggle_cur       = 0.0f;
   self->wiggle_target    = 0.0f;
   self->depth            = 0.0f;
-  self->interact_rad     = 2.0f;
+  self->interact_rad     = 1.25f;
 }
 
 void
@@ -61,5 +61,6 @@ player_render(struct player_data *self) {
     1.0f,
     self->depth
   );
-  renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
+  auto item = entities_get_item_data();
+  renderer_request_circle(self->position, self->interact_rad, check_rect_circle(item->position, item->size, self->position, self->interact_rad) ? GREEN : RED, 0.4f);
 }

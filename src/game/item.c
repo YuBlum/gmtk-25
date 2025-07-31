@@ -18,13 +18,13 @@ item_update(struct item_data *self, float dt) {
   auto player = entities_get_player_data();
   if (window_is_key_press(K_A)) {
     if (self->being_held) self->being_held = false;
-    else if (v2_intersect(self->position, self->size, player->position, player->size)) self->being_held = true;
+    else if (check_rect_circle(self->position, self->size, player->position, player->interact_rad)) self->being_held = true;
   }
   if (self->being_held) {
     self->position_target = player->scale.x > 0.0f ? V2(player->position.x - player->size.x * 0.5f, player->position.y)
                                                    : V2(player->position.x + player->size.x * 0.5f, player->position.y);
   }
-  self->position = v2_lerp(self->position, self->position_target, 4.0f * dt);
+  self->position = v2_lerp(self->position, self->position_target, 10.0f * dt);
 }
 
 void

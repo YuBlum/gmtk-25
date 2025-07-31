@@ -31,11 +31,6 @@ static inline float v2_mag(struct v2 v) { return sqrt(v.x*v.x + v.y*v.y); }
 static inline struct v2 v2_unit(struct v2 v) { float mag = sqrt(v.x*v.x + v.y*v.y); return mag == 0.0f ? V2S(0.0f) : V2(v.x/mag, v.y/mag); }
 static inline struct v2 v2_lerp(struct v2 a, struct v2 b, float t) { return V2(lerp(a.x, b.x, t), lerp(a.y, b.y, t)); }
 
-static inline bool v2_intersect(struct v2 p0, struct v2 s0, struct v2 p1, struct v2 s1) { return p0.x - s0.x * 0.5f < p1.x + s1.x * 0.5f &&
-                                                                                                 p0.x + s0.x * 0.5f > p1.x - s1.x * 0.5f &&
-                                                                                                 p0.y - s0.y * 0.5f < p1.y + s1.y * 0.5f &&
-                                                                                                 p0.y + s0.y * 0.5f > p1.y - s1.y * 0.5f; }
-
 struct v2u { uint32_t x, y; };
 #define V2U(x, y) ((struct v2u) {x, y})
 #define V2US(x) ((struct v2u) {x, x})
@@ -50,5 +45,21 @@ static inline struct v2u v2u_adds(struct v2u v, uint32_t s) { return V2U(v.x+s, 
 static inline struct v2u v2u_subs(struct v2u v, uint32_t s) { return V2U(v.x-s, v.y-s); }
 static inline struct v2u v2u_muls(struct v2u v, uint32_t s) { return V2U(v.x*s, v.y*s); }
 static inline struct v2u v2u_divs(struct v2u v, uint32_t s) { return V2U(v.x/s, v.y/s); }
+
+static inline bool
+check_rect_rect(struct v2 p0, struct v2 s0, struct v2 p1, struct v2 s1) {
+  return p0.x - s0.x * 0.5f < p1.x + s1.x * 0.5f &&
+         p0.x + s0.x * 0.5f > p1.x - s1.x * 0.5f &&
+         p0.y - s0.y * 0.5f < p1.y + s1.y * 0.5f &&
+         p0.y + s0.y * 0.5f > p1.y - s1.y * 0.5f;
+}
+
+
+static inline bool
+check_rect_circle(struct v2 rp, struct v2 s, struct v2 cp, float r) {
+  struct v2 d = v2_sub(cp, V2(fmaxf(rp.x, fminf(cp.x, rp.x + s.x)),
+                              fmaxf(rp.y, fminf(cp.y, rp.y + s.y))));
+  return (d.x*d.x + d.y*d.y) <= r*r;
+}
 
 #endif/*__YMATH_H__*/
