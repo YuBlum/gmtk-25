@@ -109,7 +109,7 @@ maps_data_h += "#include \"engine/sprites.h\"\n"
 maps_data_h += "#include \"engine/core.h\"\n\n"
 for m in maps:
     for t in m["entity_types"]:
-            maps_data_h += "static struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_position[%d] = {\n" % len(t["entities"]))
+            maps_data_h += "static const struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_position[%d] = {\n" % len(t["entities"]))
             for e in t["entities"]:
                 x = "%g" % e["x"]
                 if "." not in x:
@@ -119,7 +119,7 @@ for m in maps:
                     y += ".0"
                 maps_data_h += "  { " + x + "/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (" + y + "/UNIT_PER_PIXEL) },\n"
             maps_data_h += "};\n\n"
-            maps_data_h += "static struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_size[%d] = {\n" % len(t["entities"]))
+            maps_data_h += "static const struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_size[%d] = {\n" % len(t["entities"]))
             for e in t["entities"]:
                 w = "%g" % e["w"]
                 if "." not in w:
@@ -133,8 +133,8 @@ maps_data_h += "static const struct {\n"
 maps_data_h += "  struct v2u tiles_position[MAP_TILES_AMOUNT];\n"
 maps_data_h += "  struct v2u tiles_size[MAP_TILES_AMOUNT];\n"
 for t in all_entity_types:
-    maps_data_h += "  struct v2 *" + t + "_position;\n"
-    maps_data_h += "  struct v2 *" + t + "_size;\n"
+    maps_data_h += "  const struct v2 *" + t + "_position;\n"
+    maps_data_h += "  const struct v2 *" + t + "_size;\n"
 for t in all_entity_types:
     maps_data_h += "  uint32_t " + t + "_amount;\n"
 maps_data_h += "  enum sprite tileset;\n"

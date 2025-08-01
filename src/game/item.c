@@ -16,8 +16,6 @@ item_init(struct item_data *self) {
   self->amount = self->capacity;
   for (size_t i = 0; i < self->amount; i++) {
     self->sprite[i]           = SPR_ITEM_TEST;
-    self->position[i]         = V2(randf() * GAME_W - GAME_W * 0.5f, randf() * GAME_H - GAME_H * 0.5f);
-    self->position_target[i]  = self->position[i];
     self->size[i]             = V2(0.5f, 0.5f);
     self->launch_velocity[i]  = V2(0.0f, 0.0f);
     self->flash[i]            = 0.0f;

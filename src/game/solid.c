@@ -8,10 +8,6 @@ extern bool show_colliders;
 void
 solid_init(struct solid_data *self) {
   self->amount = self->capacity;
-  for (uint32_t i = 0; i < self->amount; i++) {
-    self->position[i] = V2(0.0f, -2.0f);
-    self->size[i]     = V2(randf() * 1.5f + 1.0f, randf() * 1.5f + 1.0f);
-  }
 }
 
 void

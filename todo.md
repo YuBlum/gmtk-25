@@ -1,4 +1,4 @@
-- [ ] Walls
+- [x] Walls
 - [ ] Boxes
 - [ ] Door
 - [ ] Pass to next room state
