@@ -22,11 +22,13 @@ player_init(struct player_data *self) {
   self->position         = V2(0.0f, 0.0f);
   self->size             = V2(1.0f, 0.75f);
   self->scale            = V2(1.0f, 1.0f);
+  self->origin           = V2(0.0f, 0.45f);
+  self->interact_pos     = v2_add(self->position, self->origin);
+  self->interact_rad     = 1.5f;
   self->angle            = 0.0f;
   self->wiggle_cur       = 0.0f;
   self->wiggle_target    = 0.0f;
   self->depth            = 0.0f;
-  self->interact_rad     = 1.5f;
   self->item_held        = -1;
 }
 
@@ -65,6 +67,7 @@ player_update(struct player_data *self, float dt) {
     next_position.y = resolve_rect_rect_axis(self->position.y, self->size.y, solids->position[collided_y].y, solids->size[collided_y].y);
   }
   self->position = next_position;
+  self->interact_pos = v2_add(self->position, self->origin);
   bool moving = move_direction.x != 0.0f || move_direction.y != 0.0f;
   /* wiggle */
   self->wiggle_cur = lerp(self->wiggle_cur, self->wiggle_target, WIGGLE_SPEED * dt);
@@ -86,7 +89,7 @@ player_render(struct player_data *self) {
   renderer_request_sprite(
     self->sprite,
     self->position,
-    V2(0.0f, 0.45f),
+    self->origin,
     self->angle,
     self->scale,
     WHITE,
@@ -98,7 +101,7 @@ player_render(struct player_data *self) {
 #if DEV
   if (show_colliders) {
     renderer_request_rect(self->position, self->size, RGB(1.0f, 0.0f, 1.0f), 0.4f, -100.0f);
-    renderer_request_circle(self->position, self->interact_rad, GREEN, 0.1f);
+    renderer_request_circle(v2_add(self->position, self->origin), self->interact_rad, GREEN, 0.1f);
   }
 #endif
 }

@@ -1,17 +1,18 @@
 [entity.unique.player]
 component = [ "renderable", "collidable" ]
-exclude   = [ "color", "opacity", "origin", "flash" ]
+exclude   = [ "color", "opacity", "flash" ]
 field.direction     = "struct v2"
+field.interact_pos  = "struct v2"
+field.interact_rad  = "float"
 field.wiggle_cur    = "float"
 field.wiggle_target = "float"
-field.interact_rad  = "float"
 field.item_held     = "int32_t"
 
 # the 'box' entity type has to come before the 'item' one 
 [entity.box]
 component = [ "renderable", "collidable", "flashable" ]
 exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
-field.item_held = "int32_t"
+field.item_held = "enum item_type"
 
 [entity.item]
 has_init = false

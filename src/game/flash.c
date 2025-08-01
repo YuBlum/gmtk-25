@@ -11,7 +11,7 @@ flash_update_target(uint32_t amount, float *flash_targets, float *flashes, struc
   auto player = entities_get_player_data();
   int32_t target = -1;
   for (uint32_t i = 0; i < amount; i++) {
-    if (!check_rect_circle(positions[i], sizes[i], player->position, player->interact_rad) || target != -1) {
+    if (!check_rect_circle(positions[i], sizes[i], player->interact_pos, player->interact_rad) || target != -1) {
       flash_targets[i] = 0.0f;
       continue;
     }

@@ -98,7 +98,7 @@ item_update(struct item_data *self, float dt) {
   }
   if (interacting) {
     for (uint32_t i = 0; i < self->amount; i++) {
-      if (!check_rect_circle(self->position[i], self->size[i], player->position, player->interact_rad)) continue;
+      if (!check_rect_circle(self->position[i], self->size[i], player->interact_pos, player->interact_rad)) continue;
       self->depth[i] = player->depth - 1.0f;
       self->launch_velocity[i] = V2(0.0f, 0.0f);
       player->item_held = i;

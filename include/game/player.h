@@ -9,13 +9,15 @@ struct player_data {
   struct v2 position;
   struct v2 scale;
   enum sprite sprite;
+  struct v2 origin;
   float angle;
   float depth;
   struct v2 size;
   struct v2 direction;
+  struct v2 interact_pos;
+  float interact_rad;
   float wiggle_cur;
   float wiggle_target;
-  float interact_rad;
   int32_t item_held;
 };
 
