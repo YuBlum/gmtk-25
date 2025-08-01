@@ -5,7 +5,7 @@ field.direction     = "struct v2"
 field.wiggle_cur    = "float"
 field.wiggle_target = "float"
 field.interact_rad  = "float"
-field.held_item     = "int32_t"
+field.item_held     = "int32_t"
 
 [entity.item]
 component = [ "renderable", "collidable", "flashable" ]
@@ -20,6 +20,7 @@ component = [ "collidable" ]
 [entity.box]
 component = [ "renderable", "collidable", "flashable" ]
 exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
+field.item_held = "int32_t"
 
 [component.renderable]
 position = "struct v2"

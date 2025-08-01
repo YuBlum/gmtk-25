@@ -131,6 +131,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate box flash_target data");
       return false;
     }
+    g_entities.box_data.item_held = arena_push_array(g_entities.arena, false, int32_t, layout->box_capacity);
+    if (!g_entities.box_data.item_held) {
+      log_errorl("couldn't allocate box item_held data");
+      return false;
+    }
     box_init(&g_entities.box_data);
   } else {
     g_entities.box_data.capacity = 0;

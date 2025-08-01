@@ -27,7 +27,7 @@ player_init(struct player_data *self) {
   self->wiggle_target    = 0.0f;
   self->depth            = 0.0f;
   self->interact_rad     = 1.5f;
-  self->held_item        = -1;
+  self->item_held        = -1;
 }
 
 void

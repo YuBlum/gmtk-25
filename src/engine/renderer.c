@@ -9,6 +9,7 @@
 #include "engine/shaders.h"
 #include "engine/renderer.h"
 #include "engine/atlas.h"
+#include "engine/maps.h"
 
 struct vertex {
   struct v2    position;
@@ -258,7 +259,7 @@ renderer_submit(void) {
 }
 
 void
-renderer_request_sprites(uint32_t amount, enum sprite sprites[amount], const struct v2 positions[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]) {
+renderer_request_sprites(uint32_t amount, const enum sprite sprites[amount], const struct v2 positions[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]) {
 #if DEV
   if (g_renderer.quads_amount + amount >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
@@ -391,6 +392,88 @@ renderer_request_sprites(uint32_t amount, enum sprite sprites[amount], const str
   } else {
     for (uint32_t i = 0; i < amount; i++) {
       g_renderer.indices_to_sort[g_renderer.quads_amount + i].depth = 0.0f;
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].start = (g_renderer.quads_amount + i) * 4;
+    }
+  }
+  g_renderer.quads_amount += amount;
+}
+
+void
+renderer_request_tileset(uint32_t amount, enum sprite tileset, const struct v2u tileset_offset[amount], const struct v2 positions[amount], const float depths[amount]) {
+#if DEV
+  if (g_renderer.quads_amount + amount >= QUAD_CAPACITY) {
+    log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
+    return;
+  }
+#endif
+  struct v2 hsiz, tpos, tsiz, cos_sin;
+  static_assert(sizeof (struct vertex) == sizeof (float) * 13);
+#if DEV
+  if (tileset >= SPRITES_AMOUNT) {
+    log_warnlf("%s: passed tileset has invalid sprite number '%d' exists", __func__, tileset);
+    return;
+  }
+#endif
+  hsiz = V2(TILE_WIDTH * 0.5f * UNIT_ONE_PIXEL, TILE_HEIGHT * 0.5f * UNIT_ONE_PIXEL);
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].origin = V2(-hsiz.x, -hsiz.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].origin = V2(+hsiz.x, -hsiz.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].origin = V2(+hsiz.x, +hsiz.y);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].origin = V2(-hsiz.x, +hsiz.y);
+  }
+#if DEV
+  if (!positions) {
+    log_errorlf("%s: 'positions' argument cannot be NULL", __func__);
+    return;
+  }
+#endif
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].position = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].position = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = positions[i];
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = positions[i];
+  }
+  tsiz = V2(TILE_WIDTH * ATLAS_PIXEL_W, TILE_HEIGHT * ATLAS_PIXEL_H);
+  for (uint32_t i = 0; i < amount; i++) {
+    tpos = v2_add(g_atlas_sprite_positions[tileset], V2(tileset_offset[i].x * ATLAS_PIXEL_W, tileset_offset[i].y * ATLAS_PIXEL_H));
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].texcoord = v2_add(tpos, V2(0.0f  , tsiz.y));
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].texcoord = v2_add(tpos, V2(tsiz.x, tsiz.y));
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].texcoord = v2_add(tpos, V2(tsiz.x, 0.0f  ));
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].texcoord = v2_add(tpos, V2(0.0f  , 0.0f  ));
+  }
+  cos_sin = V2(cosf(0.0f), sinf(0.0f));
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].angle = cos_sin;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].angle = cos_sin;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].angle = cos_sin;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].angle = cos_sin;
+  }
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].color = WHITE;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].color = WHITE;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].color = WHITE;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].color = WHITE;
+  }
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].opacity = 1.0f;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].opacity = 1.0f;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].opacity = 1.0f;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].opacity = 1.0f;
+  }
+  for (uint32_t i = 0; i < amount; i++) {
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].flash = 0.0f;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].flash = 0.0f;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].flash = 0.0f;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].flash = 0.0f;
+  }
+  if (depths) {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].depth = depths[i];
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].start = (g_renderer.quads_amount + i) * 4;
+    }
+  } else {
+    for (uint32_t i = 0; i < amount; i++) {
+      g_renderer.indices_to_sort[g_renderer.quads_amount + i].depth = 1000.0f;
       g_renderer.indices_to_sort[g_renderer.quads_amount + i].start = (g_renderer.quads_amount + i) * 4;
     }
   }

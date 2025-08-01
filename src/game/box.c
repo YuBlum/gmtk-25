@@ -16,7 +16,12 @@ box_init(struct box_data *self) {
 
 void
 box_update(struct box_data *self, float dt) {
-  (void)flash_update_target(self->amount, self->flash_target, self->flash, self->position, self->size);
+  auto player = entities_get_player_data();
+  if (player->item_held == -1) {
+    for (uint32_t i = 0; i < self->amount; i++) self->flash_target[i] = 0.0f;
+  } else {
+    (void)flash_update_target(self->amount, self->flash_target, self->flash, self->position, self->size);
+  }
   flash_update(self->amount, self->flash_target, self->flash, dt);
 }
 

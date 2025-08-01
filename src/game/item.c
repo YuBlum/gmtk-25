@@ -26,8 +26,8 @@ item_update(struct item_data *self, float dt) {
   if (!self->amount) return;
   bool interacting = window_is_key_press(K_A);
   auto player = entities_get_player_data();
-  if (player->held_item >= 0) {
-    int32_t i = player->held_item;
+  if (player->item_held >= 0) {
+    int32_t i = player->item_held;
     self->position_target[i] = player->scale.x > 0.0f ? V2(player->position.x - player->size.x * 0.5f, player->position.y)
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
@@ -63,7 +63,7 @@ item_update(struct item_data *self, float dt) {
     }
     self->launch_velocity[self->amount - 1]  = v2_muls(V2(cosf(launch_angle), sinf(launch_angle)),
                                                        randf() * (LAUNCH_MAX_SPEED-LAUNCH_MIN_SPEED) + LAUNCH_MIN_SPEED);
-    player->held_item = -1;
+    player->item_held = -1;
     return;
   }
   if (interacting) {
@@ -71,7 +71,7 @@ item_update(struct item_data *self, float dt) {
       if (!check_rect_circle(self->position[i], self->size[i], player->position, player->interact_rad)) continue;
       self->depth[i] = player->depth - 1.0f;
       self->launch_velocity[i] = V2(0.0f, 0.0f);
-      player->held_item = i;
+      player->item_held = i;
       break;
     }
     for (uint32_t i = 0; i < self->amount; i++) {

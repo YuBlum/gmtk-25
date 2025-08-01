@@ -25,6 +25,8 @@ all_entity_types = {};
 
 tilemap_width = 20
 tilemap_height = 20
+tile_width = 16
+tile_height = 16
 
 for name, map in zip(names, maps_json):
     if len(map["tilesets"]) != 1:
@@ -52,12 +54,13 @@ for name, map in zip(names, maps_json):
                 print("tileset layer has to be %d by %d tiles" % (tilemap_width, tilemap_height))
                 exit(1)
             tile_ids = [t - map["tilesets"][0]["firstgid"] for t in layer["data"]]
+            if tileset["tilewidth"] != tile_width or tileset["tileheight"] != tile_height:
+                print("tile size has to be %d by %d tiles" % (tile_width, tile_height))
+                exit(1)
             m["tiles"] = [
                 {
-                    "x": t % tileset["columns"] * tileset["tilewidth"],
-                    "y": t // tileset["columns"] * tileset["tileheight"],
-                    "w": tileset["tilewidth"],
-                    "h": tileset["tileheight"]
+                    "x": t % tileset["columns"] * tile_width,
+                    "y": t // tileset["columns"] * tile_height,
                 }
                 for t in tile_ids
             ]
@@ -96,9 +99,11 @@ for i, m in enumerate(maps):
     maps_h += ",\n"
 maps_h += "  MAPS_AMOUNT\n"
 maps_h += "};\n\n"
-maps_h += "#define MAP_WIDTH %d\n\n" % tilemap_width
-maps_h += "#define MAP_HEIGHT %d\n\n" % tilemap_height
+maps_h += "#define MAP_WIDTH %d\n" % tilemap_width
+maps_h += "#define MAP_HEIGHT %d\n" % tilemap_height
 maps_h += "#define MAP_TILES_AMOUNT (MAP_WIDTH*MAP_HEIGHT)\n\n"
+maps_h += "#define TILE_WIDTH %d\n" % tile_width
+maps_h += "#define TILE_HEIGHT %d\n\n" % tile_height
 maps_h += "#endif/*__MAPS_H__*/\n"
 
 maps_data_h  = "#ifndef __MAPS_DATA_H__\n"
@@ -130,8 +135,8 @@ for m in maps:
                 maps_data_h += "  { " + w + "/UNIT_PER_PIXEL, " + h + "/UNIT_PER_PIXEL },\n"
             maps_data_h += "};\n\n"
 maps_data_h += "static const struct {\n"
-maps_data_h += "  struct v2u tiles_position[MAP_TILES_AMOUNT];\n"
-maps_data_h += "  struct v2u tiles_size[MAP_TILES_AMOUNT];\n"
+maps_data_h += "  struct v2 tiles_position[MAP_TILES_AMOUNT];\n"
+maps_data_h += "  struct v2u tiles_sprite_position[MAP_TILES_AMOUNT];\n"
 for t in all_entity_types:
     maps_data_h += "  const struct v2 *" + t + "_position;\n"
     maps_data_h += "  const struct v2 *" + t + "_size;\n"
@@ -142,12 +147,13 @@ maps_data_h += "} g_maps_data[MAPS_AMOUNT] = {\n"
 for m in maps:
     maps_data_h += "  {\n"
     maps_data_h += "    .tiles_position = {\n"
+    for y in range(0, tilemap_height):
+        for x in range(0, tilemap_width):
+            maps_data_h += "      { %d - GAME_W * 0.5f + 0.5f, GAME_H * 0.5f - %d - 0.5f },\n" % (x, y)
+    maps_data_h += "    },\n"
+    maps_data_h += "    .tiles_sprite_position = {\n"
     for tile in m["tiles"]:
         maps_data_h += "      { %d, %d },\n" % (tile["x"], tile["y"])
-    maps_data_h += "    },\n"
-    maps_data_h += "    .tiles_size = {\n"
-    for tile in m["tiles"]:
-        maps_data_h += "      { %d, %d },\n" % (tile["w"], tile["h"])
     maps_data_h += "    },\n"
     for t in all_entity_types:
         type_index = -1
