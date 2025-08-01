@@ -12,7 +12,8 @@ struct box_data {
   float *flash;
   struct v2 *size;
   float *flash_target;
-  enum item_type *item_held;
+  enum item_type *item_held_type;
+  int32_t *item_held_index;
   uint32_t capacity;
   uint32_t amount;
 };

@@ -3,7 +3,12 @@
 #include "engine/collision.h"
 #include "engine/window.h"
 
-static int32_t spawn_item_from;
+static bool g_block_btn;
+
+bool
+box_blocked_button(void) {
+  return g_block_btn;
+}
 
 void
 box_init(struct box_data *self) {
@@ -11,38 +16,42 @@ box_init(struct box_data *self) {
   uint32_t i;
   for (i = 0; i < self->amount; i++) self->sprite[i] = SPR_BOX_TEST;
   for (i = 0; i < self->amount; i++) self->size[i] = V2(1.5f, 1.5f);
-  for (i = 0; i < self->amount; i++) self->depth[i] = 0.0f;
+  for (i = 0; i < self->amount; i++) self->depth[i] = 1.0f;
   for (i = 0; i < self->amount; i++) self->flash[i] = 0.0f;
-  for (i = 0; i < self->amount; i++) self->item_held[i] = ITEM_NONE;
-  spawn_item_from = -1;
+  for (i = 0; i < self->amount; i++) self->item_held_type[i] = ITEM_NONE;
+  for (i = 0; i < self->amount; i++) self->item_held_index[i] = -1;
+  g_block_btn = false;
 }
 
 void
 box_update(struct box_data *self, float dt) {
   auto player = entities_get_player_data();
   auto item = entities_get_item_data();
-  if (spawn_item_from != -1) {
-    player->item_held = item->amount;
-    item_push(item, self->item_held[spawn_item_from], self->position[spawn_item_from]);
-    item->depth[player->item_held] = player->depth - 1.0f;
-    self->item_held[spawn_item_from] = ITEM_NONE;
-    spawn_item_from = -1;
-  }
+  if (g_block_btn) g_block_btn = false;
   int32_t target = flash_update_target(self->amount, self->flash_target, self->flash, self->position, self->size);
   if (target != -1) {
     if (player->item_held == -1) {
-      if (self->item_held[target] == ITEM_NONE) {
+      if (self->item_held_type[target] == ITEM_NONE) {
         self->flash_target[target] = 0.0f;
       } else if (window_is_key_press(K_A)) {
-        spawn_item_from = target;
+        //player->item_held = item->amount;
+        //item_push(item, self->item_held[spawn_item_from], self->position[spawn_item_from]);
+        //item->depth[player->item_held] = player->depth - 1.0f;
+        //self->item_held[spawn_item_from] = ITEM_NONE;
+        //spawn_item_from = -1;
+        //g_block_btn = true;
       }
     } else {
-      if (self->item_held[target] != ITEM_NONE) {
+      if (self->item_held_type[target] != ITEM_NONE) {
         self->flash_target[target] = 0.0f;
       } else if (window_is_key_press(K_A)) {
-        self->item_held[target] = item->type[player->item_held];
-        item_remove(item, player->item_held);
+        item->position_target[player->item_held] = self->position[target];
+        item->launch_velocity[player->item_held] = v2_muls(v2_unit(v2_sub(self->position[target], item->position[player->item_held])), 0.4f);
+        item->timer_to_die[player->item_held] = 1.0f;
+        self->item_held_type[target] = item->type[player->item_held];
+        self->item_held_index[target] = player->item_held;
         player->item_held = -1;
+        g_block_btn = true;
       }
     }
   }

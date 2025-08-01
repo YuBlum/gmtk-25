@@ -8,6 +8,7 @@
 #define LAUNCH_MIN_SPEED 0.1f
 #define LAUNCH_MAX_SPEED 0.25f
 #define LAUNCH_DECREASE_SPEED 10.0f
+#define TIMER_TO_DIE_SPEED 4.0f
 
 void
 item_push(struct item_data *self, enum item_type type, struct v2 position) {
@@ -25,6 +26,7 @@ item_push(struct item_data *self, enum item_type type, struct v2 position) {
   self->launch_velocity[i]  = V2(0.0f, 0.0f);
   self->position[i]         = position;
   self->type[i]             = type;
+  self->timer_to_die[i]     = -1.0f;
   switch (type) {
     case ITEM_TEST: {
       self->sprite[i] = SPR_ITEM_TEST;
@@ -45,7 +47,7 @@ item_remove(struct item_data *self, uint32_t index) {
     log_warnlf("%s: index '%u' bigger than the items amount", __func__, index);
     return;
   }
-  static_assert(sizeof (struct item_data) == sizeof (void *) * 10 + 8, "update the item removal, missing fields or a field was removed");
+  static_assert(sizeof (struct item_data) == sizeof (void *) * 11 + 8, "update the item removal, missing fields or a field was removed");
   uint32_t i, max = --self->amount;
   for (i = index; i < max; i++) self->position[i]        = self->position[i + 1];
   for (i = index; i < max; i++) self->sprite[i]          = self->sprite[i + 1];
@@ -57,12 +59,13 @@ item_remove(struct item_data *self, uint32_t index) {
   for (i = index; i < max; i++) self->launch_velocity[i] = self->launch_velocity[i + 1];
   for (i = index; i < max; i++) self->next_position[i]   = self->next_position[i + 1];
   for (i = index; i < max; i++) self->type[i]            = self->type[i + 1];
+  for (i = index; i < max; i++) self->timer_to_die[i]    = self->timer_to_die[i + 1];
 }
 
 void
 item_update(struct item_data *self, float dt) {
   if (!self->amount) return;
-  bool interacting = window_is_key_press(K_A);
+  bool interacting = window_is_key_press(K_A) && !box_blocked_button();
   auto player = entities_get_player_data();
   if (player->item_held >= 0) {
     int32_t i = player->item_held;
@@ -70,7 +73,7 @@ item_update(struct item_data *self, float dt) {
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 10 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 11 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity', 'next_position', 'position_target' and 'depth' fields don't need to be added to the swapping */
@@ -80,6 +83,7 @@ item_update(struct item_data *self, float dt) {
     auto size             = self->size[i];
     auto flash            = self->flash[i];
     auto flash_target     = self->flash_target[i];
+    auto timer_to_die     = self->timer_to_die[i];
     item_remove(self, i);
     self->amount++;
     self->type[self->amount - 1]             = type;
@@ -88,6 +92,7 @@ item_update(struct item_data *self, float dt) {
     self->size[self->amount - 1]             = size;
     self->flash[self->amount - 1]            = flash;
     self->flash_target[self->amount - 1]     = flash_target;
+    self->timer_to_die[self->amount - 1]     = timer_to_die;
     self->position_target[self->amount - 1]  = position;
     float launch_angle;
     if (player->scale.x < 0.0f) {
@@ -102,7 +107,8 @@ item_update(struct item_data *self, float dt) {
   }
   if (interacting) {
     for (uint32_t i = 0; i < self->amount; i++) {
-      if (!check_rect_circle(self->position[i], self->size[i], player->interact_pos, player->interact_rad)) continue;
+      if (!check_rect_circle(self->position[i], self->size[i], player->interact_pos, player->interact_rad) ||
+          self->timer_to_die[i] > 0.0f) continue;
       self->depth[i] = player->depth - 1.0f;
       self->launch_velocity[i] = V2(0.0f, 0.0f);
       player->item_held = i;
@@ -151,6 +157,14 @@ item_update(struct item_data *self, float dt) {
   }
   for (uint32_t i = 0; i < self->amount; i++) {
     self->position[i] = self->next_position[i];
+  }
+  for (int32_t i = (int32_t)self->amount - 1; i >= 0; i--) {
+    self->timer_to_die[i] -= dt * TIMER_TO_DIE_SPEED;
+    if (self->timer_to_die[i] > -1.0f) {
+      if (self->timer_to_die[i] < 0.0f) item_remove(self, i);
+      self->flash_target[i] = 0.0f;
+      self->depth[i] = player->depth - 1.0f;
+    }
   }
 }
 

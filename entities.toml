@@ -12,7 +12,8 @@ field.item_held     = "int32_t"
 [entity.box]
 component = [ "renderable", "collidable", "flashable" ]
 exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
-field.item_held = "enum item_type"
+field.item_held_type = "enum item_type"
+field.item_held_index = "int32_t"
 
 [entity.item]
 has_init = false
@@ -22,6 +23,7 @@ field.position_target = "struct v2"
 field.launch_velocity = "struct v2"
 field.next_position   = "struct v2"
 field.type            = "enum item_type"
+field.timer_to_die    = "float"
 
 [entity.solid]
 has_init   = false

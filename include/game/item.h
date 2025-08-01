@@ -16,6 +16,7 @@ struct item_data {
   struct v2 *launch_velocity;
   struct v2 *next_position;
   enum item_type *type;
+  float *timer_to_die;
   uint32_t capacity;
   uint32_t amount;
 };
