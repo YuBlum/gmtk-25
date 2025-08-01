@@ -7,20 +7,25 @@ field.wiggle_target = "float"
 field.interact_rad  = "float"
 field.item_held     = "int32_t"
 
+# the 'box' entity type has to come before the 'item' one 
+[entity.box]
+component = [ "renderable", "collidable", "flashable" ]
+exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
+field.item_held = "int32_t"
+
 [entity.item]
+has_init = false
 component = [ "renderable", "collidable", "flashable" ]
 exclude   = [ "color", "opacity", "origin", "scale", "angle" ]
 field.position_target = "struct v2"
 field.launch_velocity = "struct v2"
 field.next_position   = "struct v2"
+field.type            = "enum item_type"
 
 [entity.solid]
+has_init   = false
+has_update = false
 component = [ "collidable" ]
-
-[entity.box]
-component = [ "renderable", "collidable", "flashable" ]
-exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
-field.item_held = "int32_t"
 
 [component.renderable]
 position = "struct v2"

@@ -1,6 +1,7 @@
 #ifndef __BOX_H__
 #define __BOX_H__
 
+#include "game/core.h"
 #include "engine/math.h"
 #include "engine/renderer.h"
 

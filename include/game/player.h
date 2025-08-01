@@ -1,6 +1,7 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
+#include "game/core.h"
 #include "engine/math.h"
 #include "engine/renderer.h"
 

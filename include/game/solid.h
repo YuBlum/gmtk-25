@@ -1,6 +1,7 @@
 #ifndef __SOLID_H__
 #define __SOLID_H__
 
+#include "game/core.h"
 #include "engine/math.h"
 #include "engine/renderer.h"
 
@@ -11,8 +12,6 @@ struct solid_data {
   uint32_t amount;
 };
 
-void solid_init(struct solid_data *self);
-void solid_update(struct solid_data *self, float dt);
 void solid_render(struct solid_data *self);
 
 #endif/*__SOLID_H__*/

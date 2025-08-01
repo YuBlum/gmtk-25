@@ -10,15 +10,35 @@
 #define LAUNCH_DECREASE_SPEED 10.0f
 
 void
-item_init(struct item_data *self) {
-  self->amount = self->capacity;
-  for (size_t i = 0; i < self->amount; i++) {
-    self->sprite[i]           = SPR_ITEM_TEST;
-    self->size[i]             = V2(0.5f, 0.5f);
-    self->launch_velocity[i]  = V2(0.0f, 0.0f);
-    self->flash[i]            = 0.0f;
-    self->flash_target[i]     = 0.0f;
+item_push(struct item_data *self, enum item_type type, struct v2 position) {
+  if (self->amount >= self->capacity) {
+    log_warnlf("%s: items capacity is already full", __func__);
+    return;
   }
+  if (type >= ITEM_AMOUNT) {
+    log_warnlf("%s: '%d' isn't a valid item type", __func__, type);
+    return;
+  }
+  uint32_t i = self->amount++;
+  self->flash[i]            = 0.0f;
+  self->flash_target[i]     = 0.0f;
+  self->launch_velocity[i]  = V2(0.0f, 0.0f);
+  self->position[i]         = position;
+  switch (type) {
+    case ITEM_TEST: {
+      self->sprite[i] = SPR_ITEM_TEST;
+      self->size[i]   = V2(0.5f, 0.5f);
+      self->type[i]   = type;
+    } break;
+    case ITEM_AMOUNT:
+      break;
+  }
+}
+
+void
+item_pop(struct item_data *self, uint32_t index) {
+  (void)self; (void)index;
+  log_warnlf("%s: not implemented yet", __func__);
 }
 
 void
@@ -32,23 +52,26 @@ item_update(struct item_data *self, float dt) {
                                                       : V2(player->position.x + player->size.x * 0.5f, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 9 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 10 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity', 'next_position' and 'position_target' fields don't need to be added to the swapping
        * 'depth' field also isn't needed because of the code line above */
+    auto type             = self->type[i];
     auto position         = self->position[i];
     auto sprite           = self->sprite[i];
     auto size             = self->size[i];
     auto flash            = self->flash[i];
     auto flash_target     = self->flash_target[i];
     for (uint32_t j = i; j < self->amount - 1; j++) {
+      self->type[j]             = self->type[j + 1];
       self->position[j]         = self->position[j + 1];
       self->sprite[j]           = self->sprite[j + 1];
       self->size[j]             = self->size[j + 1];
       self->flash[j]            = self->flash[j + 1];
       self->flash_target[j]     = self->flash_target[j + 1];
     }
+    self->type[self->amount - 1]             = type;
     self->position[self->amount - 1]         = position;
     self->sprite[self->amount - 1]           = sprite;
     self->size[self->amount - 1]             = size;

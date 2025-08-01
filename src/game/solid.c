@@ -6,16 +6,6 @@ extern bool show_colliders;
 #endif
 
 void
-solid_init(struct solid_data *self) {
-  self->amount = self->capacity;
-}
-
-void
-solid_update(struct solid_data *self, float dt) {
-  (void)self; (void)dt;
-}
-
-void
 solid_render(struct solid_data *self) {
   (void)self;
 #if DEV

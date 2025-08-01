@@ -20,14 +20,15 @@ scene_load_map(enum map map) {
   g_current_map = map;
   if (!entities_layout_set(&layout)) return false;
   auto item = entities_get_item_data();
-  for (uint32_t i = 0; i < item->amount; i++) {
-    item->position[i] = g_maps_data[map].items_position[i];
+  for (uint32_t i = 0; i < item->capacity; i++) {
+    item_push(item, ITEM_TEST, g_maps_data[map].items_position[i]);
   }
   auto box = entities_get_box_data();
   for (uint32_t i = 0; i < box->amount; i++) {
     box->position[i] = g_maps_data[map].boxes_position[i];
   }
   auto solid = entities_get_solid_data();
+  solid->amount = solid->capacity;
   for (uint32_t i = 0; i < solid->amount; i++) {
     solid->position[i] = g_maps_data[map].solids_position[i];
     solid->size[i] = g_maps_data[map].solids_size[i];
