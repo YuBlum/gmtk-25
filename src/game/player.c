@@ -20,7 +20,7 @@ player_init(struct player_data *self) {
 #endif
   self->sprite           = SPR_PLAYER;
   self->position         = V2(0.0f, 0.0f);
-  self->size             = V2(1.0f, 1.0f);
+  self->size             = V2(1.0f, 0.75f);
   self->scale            = V2(1.0f, 1.0f);
   self->angle            = 0.0f;
   self->wiggle_cur       = 0.0f;
@@ -86,7 +86,7 @@ player_render(struct player_data *self) {
   renderer_request_sprite(
     self->sprite,
     self->position,
-    V2(0.0f, 0.25f),
+    V2(0.0f, 0.45f),
     self->angle,
     self->scale,
     WHITE,
@@ -98,7 +98,7 @@ player_render(struct player_data *self) {
 #if DEV
   if (show_colliders) {
     renderer_request_rect(self->position, self->size, RGB(1.0f, 0.0f, 1.0f), 0.4f, -100.0f);
+    renderer_request_circle(self->position, self->interact_rad, GREEN, 0.1f);
   }
 #endif
-  //renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
 }

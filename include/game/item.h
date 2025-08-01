@@ -10,10 +10,10 @@ struct item_data {
   float *depth;
   float *flash;
   struct v2 *size;
+  float *flash_target;
   struct v2 *position_target;
   struct v2 *launch_velocity;
   struct v2 *next_position;
-  float *flash_target;
   uint32_t capacity;
   uint32_t amount;
 };

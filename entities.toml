@@ -8,27 +8,34 @@ field.interact_rad  = "float"
 field.held_item     = "int32_t"
 
 [entity.item]
-component = [ "renderable", "collidable" ]
+component = [ "renderable", "collidable", "flashable" ]
 exclude   = [ "color", "opacity", "origin", "scale", "angle" ]
 field.position_target = "struct v2"
 field.launch_velocity = "struct v2"
 field.next_position   = "struct v2"
-field.flash_target    = "float"
 
 [entity.solid]
 component = [ "collidable" ]
 
+[entity.box]
+component = [ "renderable", "collidable", "flashable" ]
+exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
+
 [component.renderable]
-position         = "struct v2"
-scale            = "struct v2"
-sprite           = "enum sprite"
-origin           = "struct v2"
-angle            = "float"
-color            = "struct color"
-opacity          = "float"
-depth            = "float"
-flash            = "float"
+position = "struct v2"
+scale    = "struct v2"
+sprite   = "enum sprite"
+origin   = "struct v2"
+angle    = "float"
+color    = "struct color"
+opacity  = "float"
+depth    = "float"
+flash    = "float"
 
 [component.collidable]
 position = "struct v2"
 size     = "struct v2"
+
+[component.flashable]
+flash_target = "float"
+flash        = "float"

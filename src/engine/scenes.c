@@ -16,11 +16,16 @@ scene_load_map(enum map map) {
   layout.has_player = true;
   layout.item_capacity = g_maps_data[map].items_amount;
   layout.solid_capacity = g_maps_data[map].solids_amount;
+  layout.box_capacity = g_maps_data[map].boxes_amount;
   g_current_map = map;
   if (!entities_layout_set(&layout)) return false;
   auto item = entities_get_item_data();
   for (uint32_t i = 0; i < item->amount; i++) {
     item->position[i] = g_maps_data[map].items_position[i];
+  }
+  auto box = entities_get_box_data();
+  for (uint32_t i = 0; i < box->amount; i++) {
+    box->position[i] = g_maps_data[map].boxes_position[i];
   }
   auto solid = entities_get_solid_data();
   for (uint32_t i = 0; i < solid->amount; i++) {

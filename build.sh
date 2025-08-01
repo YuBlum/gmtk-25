@@ -45,8 +45,6 @@ else
   echo "invalid target platform $1"
 fi
 
-echo "$SRCS"
-
 rm -f $OUT
 $CC $FLAGS $DEF $SRCS $LIBS $INCS -o $OUT
 ./$OUT

@@ -1,4 +1,5 @@
 #include "game/entities.h"
+#include "game/flash.h"
 #include "engine/window.h"
 #include "engine/core.h"
 #include "engine/collision.h"
@@ -7,9 +8,6 @@
 #define LAUNCH_MIN_SPEED 0.1f
 #define LAUNCH_MAX_SPEED 0.25f
 #define LAUNCH_DECREASE_SPEED 10.0f
-#define FLASH_TARGET 0.7f
-#define FLASH_SPEED 8.0f
-#define FLASH_EPSILON 0.01f
 
 void
 item_init(struct item_data *self) {
@@ -81,22 +79,11 @@ item_update(struct item_data *self, float dt) {
       self->flash[i]        = 0.0f;
     }
   } else {
-    bool found_target = false;
-    for (uint32_t i = 0; i < self->amount; i++) {
-      if (!check_rect_circle(self->position[i], self->size[i], player->position, player->interact_rad) || found_target) {
-        self->flash_target[i] = 0.0f;
-        self->depth[i] = player->depth + i * 0.1f;
-      } else {
-        if (self->flash_target[i] == 0.0f && self->flash[i] <= 0.0f+FLASH_EPSILON) self->flash_target[i] = FLASH_TARGET;
-        else if (self->flash_target[i] > 0.0f && self->flash[i] >= FLASH_TARGET-FLASH_EPSILON) self->flash_target[i] = 0.0f;
-        self->depth[i] = player->depth + 0.01f;
-        found_target = true;
-      }
-    }
+    int32_t target = flash_update_target(self->amount, self->flash_target, self->flash, self->position, self->size);
+    for (uint32_t i = 0; i < self->amount; i++) self->depth[i] = player->depth + i * 0.1f;
+    if (target != -1) self->depth[target] = player->depth + 0.01f;
   }
-  for (uint32_t i = 0; i < self->amount; i++) {
-    self->flash[i] = lerp(self->flash[i], self->flash_target[i], FLASH_SPEED * dt);
-  }
+  flash_update(self->amount, self->flash_target, self->flash, dt);
   for (uint32_t i = 0; i < self->amount; i++) {
     self->launch_velocity[i] = v2_lerp(self->launch_velocity[i], V2(0.0f, 0.0f), LAUNCH_DECREASE_SPEED * dt);
     self->next_position[i] = v2_add(self->position[i], self->launch_velocity[i]);

@@ -101,7 +101,7 @@ for entity, body in entities_ir.items():
 
 entity_sources = {}
 for entity in entities_all:
-    entity_sources[entity] = "#include \"game/" + entity + ".h\"\n\n"
+    entity_sources[entity] = "#include \"game/entities.h\"\n\n"
     entity_sources[entity] += "void\n" + entity + "_init(struct " + entity + "_data *self) {\n"
     entity_sources[entity] += "  (void)self;\n  log_warnlf(\"%s: not implemented\", __func__);\n}\n\n"
     entity_sources[entity] += "void\n" + entity + "_update(struct " + entity + "_data *self, float dt) {\n"
