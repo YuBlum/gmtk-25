@@ -1,5 +1,5 @@
 - [x] Walls
-- [ ] Boxes
+- [x] Boxes
 - [ ] Door
 - [ ] Pass to next room state
 - [ ] Design items

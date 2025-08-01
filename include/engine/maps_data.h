@@ -7,22 +7,26 @@
 #include "game/core.h"
 #include "engine/core.h"
 
-static const struct v2 g_map_default_room_solids_position[6] = {
+static const struct v2 g_map_default_room_solids_position[8] = {
   { 8.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
   { 312.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
   { 72.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (16.0/UNIT_PER_PIXEL) },
   { 72.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
   { 248.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (16.0/UNIT_PER_PIXEL) },
   { 248.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
+  { 64.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
+  { 256.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
 };
 
-static const struct v2 g_map_default_room_solids_size[6] = {
+static const struct v2 g_map_default_room_solids_size[8] = {
   { 16.0/UNIT_PER_PIXEL, 320.0/UNIT_PER_PIXEL },
   { 16.0/UNIT_PER_PIXEL, 320.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 32.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 32.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
+  { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
+  { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
 };
 
 static const struct v2 g_map_default_room_items_position[2] = {
@@ -860,7 +864,7 @@ static const struct {
     },
     .solids_position = g_map_default_room_solids_position,
     .solids_size     = g_map_default_room_solids_size,
-    .solids_amount   = 6,
+    .solids_amount   = 8,
     .items_position = g_map_default_room_items_position,
     .items_type     = g_map_default_room_items_type,
     .items_amount   = 2,

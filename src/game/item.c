@@ -135,6 +135,7 @@ item_update(struct item_data *self, float dt) {
   int32_t collided;
   struct v2 next;
   for (uint32_t i = 0; i < self->amount; i++) {
+    if (self->box_index[i] != -1) continue;
     collided = -1;
     next = V2(self->next_position[i].x, self->position[i].y);
     for (int32_t j = 0; j < (int32_t)solids->amount; j++) {
@@ -147,6 +148,7 @@ item_update(struct item_data *self, float dt) {
     self->next_position[i].x = resolve_rect_rect_axis(self->position[i].x,self->size[i].x, solids->position[collided].x,solids->size[collided].x);
   }
   for (uint32_t i = 0; i < self->amount; i++) {
+    if (self->box_index[i] != -1) continue;
     collided = -1;
     next = V2(self->position[i].x, self->next_position[i].y);
     for (int32_t j = 0; j < (int32_t)solids->amount; j++) {
