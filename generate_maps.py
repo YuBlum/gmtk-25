@@ -86,19 +86,27 @@ for name, map in zip(names, maps_json):
             exit(1)
     maps.append(m)
 
+maps_h  = "#ifndef __MAPS_H__\n"
+maps_h += "#define __MAPS_H__\n\n"
+maps_h += "enum map {\n"
+for i, m in enumerate(maps):
+    maps_h += "  MAP_" + m["name"].upper()
+    if i == 0:
+        maps_h += " = 0"
+    maps_h += ",\n"
+maps_h += "  MAPS_AMOUNT\n"
+maps_h += "};\n\n"
+maps_h += "#define MAP_WIDTH %d\n\n" % tilemap_width
+maps_h += "#define MAP_HEIGHT %d\n\n" % tilemap_height
+maps_h += "#define MAP_TILES_AMOUNT (MAP_WIDTH*MAP_HEIGHT)\n\n"
+maps_h += "#endif/*__MAPS_H__*/\n"
+
 maps_data_h  = "#ifndef __MAPS_DATA_H__\n"
 maps_data_h += "#define __MAPS_DATA_H__\n\n"
 maps_data_h += "#include \"engine/math.h\"\n"
+maps_data_h += "#include \"engine/maps.h\"\n"
+maps_data_h += "#include \"engine/sprites.h\"\n"
 maps_data_h += "#include \"engine/core.h\"\n\n"
-maps_data_h += "enum map {\n"
-for i, m in enumerate(maps):
-    maps_data_h += "  MAP_" + m["name"].upper()
-    if i == 0:
-        maps_data_h += " = 0"
-    maps_data_h += ",\n"
-maps_data_h += "  MAPS_AMOUNT\n"
-maps_data_h += "};\n\n"
-maps_data_h += "#define MAP_TILES_AMOUNT %d\n\n" % (tilemap_width*tilemap_height)
 for m in maps:
     for t in m["entity_types"]:
             maps_data_h += "static struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_position[%d] = {\n" % len(t["entities"]))
@@ -109,7 +117,7 @@ for m in maps:
                 y = "%g" % e["y"]
                 if "." not in y:
                     y += ".0"
-                maps_data_h += "  { " + x + "/UNIT_PER_PIXEL, " + y + "/UNIT_PER_PIXEL },\n"
+                maps_data_h += "  { " + x + "/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (" + y + "/UNIT_PER_PIXEL) },\n"
             maps_data_h += "};\n\n"
             maps_data_h += "static struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_size[%d] = {\n" % len(t["entities"]))
             for e in t["entities"]:
@@ -129,6 +137,7 @@ for t in all_entity_types:
     maps_data_h += "  struct v2 *" + t + "_size;\n"
 for t in all_entity_types:
     maps_data_h += "  uint32_t " + t + "_amount;\n"
+maps_data_h += "  enum sprite tileset;\n"
 maps_data_h += "} g_maps_data[MAPS_AMOUNT] = {\n"
 for m in maps:
     maps_data_h += "  {\n"
@@ -154,6 +163,7 @@ for m in maps:
             maps_data_h += "    ." + t + "_position = 0,\n"
             maps_data_h += "    ." + t + "_size     = 0,\n"
             maps_data_h += "    ." + t + "_amount   = 0,\n"
+    maps_data_h += "    .tileset = " + m["tileset"] + ",\n"
     maps_data_h += "  },\n"
 maps_data_h += "};\n\n"
 maps_data_h += "#endif/*__MAPS_DATA_H__*/\n"
@@ -162,6 +172,15 @@ path = "./include/engine/maps_data.h"
 try:
     with open(path, "w") as f:
         f.write(maps_data_h)
+        pass
+except:
+    print("couldn't open '", path, "'", sep="");
+    exit(1)
+
+path = "./include/engine/maps.h"
+try:
+    with open(path, "w") as f:
+        f.write(maps_h)
         pass
 except:
     print("couldn't open '", path, "'", sep="");

@@ -2,22 +2,17 @@
 #define __MAPS_DATA_H__
 
 #include "engine/math.h"
+#include "engine/maps.h"
+#include "engine/sprites.h"
 #include "engine/core.h"
 
-enum map {
-  MAP_DEFAULT_ROOM = 0,
-  MAPS_AMOUNT
-};
-
-#define MAP_TILES_AMOUNT 400
-
 static struct v2 g_map_default_room_solids_position[6] = {
-  { 8.0/UNIT_PER_PIXEL, 160.0/UNIT_PER_PIXEL },
-  { 312.0/UNIT_PER_PIXEL, 160.0/UNIT_PER_PIXEL },
-  { 80.0/UNIT_PER_PIXEL, 8.0/UNIT_PER_PIXEL },
-  { 80.0/UNIT_PER_PIXEL, 312.0/UNIT_PER_PIXEL },
-  { 240.0/UNIT_PER_PIXEL, 8.0/UNIT_PER_PIXEL },
-  { 240.0/UNIT_PER_PIXEL, 312.0/UNIT_PER_PIXEL },
+  { 8.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
+  { 312.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
+  { 80.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (8.0/UNIT_PER_PIXEL) },
+  { 80.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
+  { 240.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (8.0/UNIT_PER_PIXEL) },
+  { 240.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
 };
 
 static struct v2 g_map_default_room_solids_size[6] = {
@@ -29,12 +24,14 @@ static struct v2 g_map_default_room_solids_size[6] = {
   { 128.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
 };
 
-static struct v2 g_map_default_room_items_position[2] = {
-  { 80.0/UNIT_PER_PIXEL, 160.0/UNIT_PER_PIXEL },
-  { 240.0/UNIT_PER_PIXEL, 160.0/UNIT_PER_PIXEL },
+static struct v2 g_map_default_room_items_position[3] = {
+  { 80.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
+  { 165.5/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (117.0/UNIT_PER_PIXEL) },
+  { 240.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
 };
 
-static struct v2 g_map_default_room_items_size[2] = {
+static struct v2 g_map_default_room_items_size[3] = {
+  { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
   { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
   { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
 };
@@ -48,6 +45,7 @@ static const struct {
   struct v2 *items_size;
   uint32_t solids_amount;
   uint32_t items_amount;
+  enum sprite tileset;
 } g_maps_data[MAPS_AMOUNT] = {
   {
     .tiles_position = {
@@ -859,7 +857,8 @@ static const struct {
     .solids_amount   = 6,
     .items_position = g_map_default_room_items_position,
     .items_size     = g_map_default_room_items_size,
-    .items_amount   = 2,
+    .items_amount   = 3,
+    .tileset = SPR_ROOM_TILESET,
   },
 };
 

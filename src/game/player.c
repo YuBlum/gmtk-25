@@ -16,7 +16,7 @@ bool show_colliders;
 void
 player_init(struct player_data *self) {
 #if DEV
-  show_colliders = true;
+  show_colliders = false;
 #endif
   self->sprite           = SPR_PLAYER;
   self->position         = V2(0.0f, 0.0f);
@@ -96,7 +96,9 @@ player_render(struct player_data *self) {
   );
 
 #if DEV
-  //renderer_request_rect(self->position, self->size, RGB(1.0f, 0.0f, 1.0f), 0.4f, -100.0f);
+  if (show_colliders) {
+    renderer_request_rect(self->position, self->size, RGB(1.0f, 0.0f, 1.0f), 0.4f, -100.0f);
+  }
 #endif
   //renderer_request_circle(self->position, self->interact_rad, GREEN, 0.4f);
 }

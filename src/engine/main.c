@@ -4,6 +4,7 @@
 #include "engine/window.h"
 #include "engine/mixer.h"
 #include "engine/renderer.h"
+#include "engine/scenes.h"
 #include "game/entities.h"
 #include "game/player.h"
 
@@ -33,19 +34,16 @@ main(void) {
     window_destroy();
     return 1;
   }
-  if (!entities_layout_set(&(struct entities_layout) {
-    .has_player = true,
-    .item_capacity = 5,
-    .solid_capacity = 1,
-  })) {
+  if (!scene_load_map(0)) {
     mixer_destroy();
     window_destroy();
     return 1;
-  } // TODO: remove this from here
+  }
   while (window_is_running()) {
     if (window_is_key_down(K_EXIT)) window_close();
     entities_update(window_get_delta_time());
     entities_render();
+    scene_render();
     renderer_submit();
     arena_clear(tmp_arena);
   }

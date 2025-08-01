@@ -1,4 +1,5 @@
 #include "engine/maps_data.h"
+#include "engine/renderer.h"
 #include "game/entities.h"
 
 static enum map g_current_map;
@@ -29,4 +30,25 @@ scene_load_map(enum map map) {
   return true;
 }
 
-
+void
+scene_render(void) {
+  auto map = &g_maps_data[g_current_map];
+  for (uint32_t i = 0; i < MAP_HEIGHT; i++) {
+    for (uint32_t j = 0; j < MAP_WIDTH; j++) {
+      struct v2 position = { j - GAME_W * 0.5f + 0.5f, GAME_H * 0.5f - i - 0.5f };
+      renderer_request_sprite_slice(
+        map->tileset,
+        map->tiles_position[i * MAP_WIDTH + j],
+        map->tiles_size[i * MAP_WIDTH + j],
+        position,
+        V2(0.0f, 0.0f),
+        0.0f,
+        V2(1.0f, 1.0f),
+        WHITE,
+        1.0f,
+        100.0f,
+        0.0f
+      );
+    }
+  }
+}
