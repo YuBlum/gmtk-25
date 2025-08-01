@@ -43,7 +43,7 @@ for name, map in zip(names, maps_json):
         "name"         : name,
         "tileset"      : "SPR_" + tileset["name"].upper(),
         "tiles"        : [],
-        "entity_types" : []
+        "entity-types" : []
     }
     for layer in map["layers"]:
         if layer["type"] == "tilelayer":
@@ -66,6 +66,7 @@ for name, map in zip(names, maps_json):
             ]
         elif layer["type"] == "objectgroup":
             has_size = False
+            extra_buffers = {}
             if "properties" in layer:
                 for p in layer["properties"]:
                     if p["name"] == "has-size":
@@ -73,25 +74,80 @@ for name, map in zip(names, maps_json):
                             print("'has-size' property has to be a boolean, but in layer '", layer["name"], "' it's a '", p["type"], "'", sep="")
                             exit(1)
                         has_size = p["value"]
+                        continue
+                    if p["type"] != "string":
+                        print("layer properties represent variable definitions, their value needs to be a string representing a type. property '", p["name"], "' of layer '", layer["name"], "' is a '", p["type"], "', not a string", sep="")
+                        exit(1)
+                    extra_buffers[p["name"]] = p["value"]
+                    pass
             if not layer["name"] in all_entity_types:
                 all_entity_types[layer["name"]] = {
                     "has-size": has_size,
+                    "extra-buffers": extra_buffers
                 }
             elif all_entity_types[layer["name"]]["has-size"] != has_size:
                 print("some maps have 'has-size' on '", layer["name"], "', but map '", name, "' don't", sep="")
                 exit(1)
-            m["entity_types"].append({
+            else:
+                for pname0, typ0 in all_entity_types[layer["name"]]["extra-buffers"].items():
+                    found = False
+                    for pname1, typ1 in extra_buffers.items():
+                        if pname0 == pname1:
+                            found = True
+                            if typ0 != typ1:
+                                print("the type of '", pname0,"' of layer '", layer["name"], "' is '" ,typ0, "' in other maps, but on the map '", name, "' is '", typ1, "'", sep="")
+                                exit(1)
+                            break
+                    if not found:
+                        print("the property '", pname0, "' of the layer '", layer["name"], "' don't exists on the map '", name, "'", sep="")
+                        exit(1)
+                for pname0 in extra_buffers.keys():
+                    found = False
+                    for pname1 in all_entity_types[layer["name"]]["extra-buffers"].keys():
+                        if pname0 == pname1:
+                            found = True
+                            break
+                    if not found:
+                        print("the property '", pname0, "' of the layer '", layer["name"], "' is set on the map '", name,"', but in some of the other maps it isn't", sep="")
+                        exit(1)
+            entities = []
+            for o in layer["objects"]:
+                e = {}
+                e["x"] = o["x"]
+                e["y"] = o["y"]
+                if has_size:
+                    e["x"] += o["width"] * 0.5
+                    e["y"] += o["height"] * 0.5
+                    e["w"]  = o["width"]
+                    e["h"]  = o["height"]
+                for pname in extra_buffers.keys():
+                    if not "properties" in o:
+                        print("a object of the layer '", layer["name"], "', on map '", name, "', doesn't implement the property '", pname, "'",sep="")
+                        exit(1)
+                    found = False
+                    for prop in o["properties"]:
+                        if pname == prop["name"]:
+                            found = True
+                            break
+                    if not found:
+                        print("a object of the layer '", layer["name"], "', on map '", name, "', doesn't implement the property '", pname, "'",sep="")
+                        exit(1)
+                if "properties" in o:
+                    for prop in o["properties"]:
+                        for pname in extra_buffers.keys():
+                            if prop["name"] != pname:
+                                print("a object of the layer '", layer["name"], "', on map '", name, "', has invalid property '", pname, "'",sep="")
+                                exit(1)
+                            if prop["type"] != "string":
+                                print("object properties represent variable assignments, their value needs to be a string representing a value. property '", prop["name"], "' of an object in the layer '", layer["name"], "' is a '", p["type"], "', not a string", sep="")
+                                exit(1)
+                        e[prop["name"]] = prop["value"]
+                entities.append(e)
+            m["entity-types"].append({
                 "has-size": has_size,
                 "type": layer["name"],
-                "entities": [
-                    {
-                        "x": o["x"] + (o["width"]  * 0.5 if has_size else 0),
-                        "y": o["y"] + (o["height"] * 0.5 if has_size else 0),
-                        "w": 0 if not has_size else o["width"],
-                        "h": 0 if not has_size else o["height"]
-                    }
-                    for o in layer["objects"]
-                ]
+                "extra-buffers": extra_buffers,
+                "entities": entities
             })
         else:
             print("layer type '" + layer["type"] + "', isn't supported ")
@@ -120,9 +176,10 @@ maps_data_h += "#define __MAPS_DATA_H__\n\n"
 maps_data_h += "#include \"engine/math.h\"\n"
 maps_data_h += "#include \"engine/maps.h\"\n"
 maps_data_h += "#include \"engine/sprites.h\"\n"
+maps_data_h += "#include \"game/core.h\"\n"
 maps_data_h += "#include \"engine/core.h\"\n\n"
 for m in maps:
-    for t in m["entity_types"]:
+    for t in m["entity-types"]:
             maps_data_h += "static const struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_position[%d] = {\n" % len(t["entities"]))
             for e in t["entities"]:
                 x = "%g" % e["x"]
@@ -144,6 +201,11 @@ for m in maps:
                         h += ".0"
                     maps_data_h += "  { " + w + "/UNIT_PER_PIXEL, " + h + "/UNIT_PER_PIXEL },\n"
                 maps_data_h += "};\n\n"
+            for bname, btyp in t["extra-buffers"].items():
+                maps_data_h += "static const " + btyp + " g_map_" + m["name"] + "_" + t["type"] + ("_" + bname + "[%d] = {\n" % len(t["entities"]))
+                for e in t["entities"]:
+                    maps_data_h += "  " + e[bname] + ",\n"
+                maps_data_h += "};\n\n"
 maps_data_h += "static const struct {\n"
 maps_data_h += "  struct v2 tiles_position[MAP_TILES_AMOUNT];\n"
 maps_data_h += "  struct v2u tiles_sprite_position[MAP_TILES_AMOUNT];\n"
@@ -151,6 +213,8 @@ for name, props in all_entity_types.items():
     maps_data_h += "  const struct v2 *" + name + "_position;\n"
     if props["has-size"]:
         maps_data_h += "  const struct v2 *" + name + "_size;\n"
+    for bname, btyp in props["extra-buffers"].items():
+        maps_data_h += "  const " + btyp + " *" + name + "_" + bname + ";\n"
 for name in all_entity_types.keys():
     maps_data_h += "  uint32_t " + name + "_amount;\n"
 maps_data_h += "  enum sprite tileset;\n"
@@ -168,7 +232,7 @@ for m in maps:
     maps_data_h += "    },\n"
     for name, props in all_entity_types.items():
         type_index = -1
-        for i, map_t in enumerate(m["entity_types"]):
+        for i, map_t in enumerate(m["entity-types"]):
             if map_t["type"] == name:
                 type_index = i
                 break
@@ -176,11 +240,15 @@ for m in maps:
             maps_data_h += "    ." + name + "_position = g_map_" + m["name"] + "_" + name + "_position,\n"
             if props["has-size"]:
                 maps_data_h += "    ." + name + "_size     = g_map_" + m["name"] + "_" + name + "_size,\n"
-            maps_data_h += "    ." + name + "_amount   = %d,\n" % len(m["entity_types"][type_index]["entities"])
+            for bname in props["extra-buffers"].keys():
+                maps_data_h += "    ." + name + "_" + bname + "     = g_map_" + m["name"] + "_" + name + "_" + bname + ",\n"
+            maps_data_h += "    ." + name + "_amount   = %d,\n" % len(m["entity-types"][type_index]["entities"])
         else:
             maps_data_h += "    ." + name + "_position = 0,\n"
             if props["has-size"]:
                 maps_data_h += "    ." + name + "_size     = 0,\n"
+            for bname in props["extra-buffers"].keys():
+                maps_data_h += "    ." + name + "_" + bname + "     = 0,\n"
             maps_data_h += "    ." + name + "_amount   = 0,\n"
     maps_data_h += "    .tileset = " + m["tileset"] + ",\n"
     maps_data_h += "  },\n"

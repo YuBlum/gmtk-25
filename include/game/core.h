@@ -8,6 +8,7 @@ struct item_data;
 
 enum item_type {
   ITEM_TEST = 0,
+  ITEM_TEST2,
   ITEM_AMOUNT,
   ITEM_NONE = ITEM_AMOUNT
 };

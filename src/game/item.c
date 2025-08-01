@@ -24,11 +24,15 @@ item_push(struct item_data *self, enum item_type type, struct v2 position) {
   self->flash_target[i]     = 0.0f;
   self->launch_velocity[i]  = V2(0.0f, 0.0f);
   self->position[i]         = position;
+  self->type[i]             = type;
   switch (type) {
     case ITEM_TEST: {
       self->sprite[i] = SPR_ITEM_TEST;
       self->size[i]   = V2(0.5f, 0.5f);
-      self->type[i]   = type;
+    } break;
+    case ITEM_TEST2: {
+      self->sprite[i] = SPR_ITEM_TEST2;
+      self->size[i]   = V2(1.0f, 1.0f);
     } break;
     case ITEM_AMOUNT:
       break;

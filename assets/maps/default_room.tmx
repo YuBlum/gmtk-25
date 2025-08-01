@@ -42,8 +42,19 @@
   <object id="18" x="244" y="52" width="24" height="24"/>
  </objectgroup>
  <objectgroup id="3" name="items">
-  <object id="12" x="80" y="160"/>
-  <object id="13" x="240" y="160"/>
+  <properties>
+   <property name="type" value="enum item_type"/>
+  </properties>
+  <object id="12" x="80" y="160">
+   <properties>
+    <property name="type" value="ITEM_TEST"/>
+   </properties>
+  </object>
+  <object id="13" x="240" y="160">
+   <properties>
+    <property name="type" value="ITEM_TEST2"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="4" name="boxes" locked="1">
   <object id="15" x="64" y="64"/>

@@ -21,7 +21,7 @@ scene_load_map(enum map map) {
   if (!entities_layout_set(&layout)) return false;
   auto item = entities_get_item_data();
   for (uint32_t i = 0; i < item->capacity; i++) {
-    item_push(item, ITEM_TEST, g_maps_data[map].items_position[i]);
+    item_push(item, g_maps_data[map].items_type[i], g_maps_data[map].items_position[i]);
   }
   auto box = entities_get_box_data();
   for (uint32_t i = 0; i < box->amount; i++) {

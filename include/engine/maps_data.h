@@ -4,6 +4,7 @@
 #include "engine/math.h"
 #include "engine/maps.h"
 #include "engine/sprites.h"
+#include "game/core.h"
 #include "engine/core.h"
 
 static const struct v2 g_map_default_room_solids_position[8] = {
@@ -33,6 +34,11 @@ static const struct v2 g_map_default_room_items_position[2] = {
   { 240.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
 };
 
+static const enum item_type g_map_default_room_items_type[2] = {
+  ITEM_TEST,
+  ITEM_TEST2,
+};
+
 static const struct v2 g_map_default_room_boxes_position[2] = {
   { 64.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
   { 256.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
@@ -44,6 +50,7 @@ static const struct {
   const struct v2 *solids_position;
   const struct v2 *solids_size;
   const struct v2 *items_position;
+  const enum item_type *items_type;
   const struct v2 *boxes_position;
   uint32_t solids_amount;
   uint32_t items_amount;
@@ -859,6 +866,7 @@ static const struct {
     .solids_size     = g_map_default_room_solids_size,
     .solids_amount   = 8,
     .items_position = g_map_default_room_items_position,
+    .items_type     = g_map_default_room_items_type,
     .items_amount   = 2,
     .boxes_position = g_map_default_room_boxes_position,
     .boxes_amount   = 2,

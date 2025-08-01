@@ -147,6 +147,12 @@
                  "height":0,
                  "id":12,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"ITEM_TEST"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -158,6 +164,12 @@
                  "height":0,
                  "id":13,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"ITEM_TEST2"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -166,6 +178,12 @@
                  "y":160
                 }],
          "opacity":1,
+         "properties":[
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"enum item_type"
+                }],
          "type":"objectgroup",
          "visible":true,
          "x":0,
