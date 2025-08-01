@@ -70,19 +70,19 @@ atlas_h += "#define ATLAS_WIDTH %d\n" % atlas_width
 atlas_h += "#define ATLAS_HEIGHT %d\n" % atlas_height
 atlas_h += "#define ATLAS_PIXEL_W (1.0f/%d)\n" % atlas_width
 atlas_h += "#define ATLAS_PIXEL_H (1.0f/%d)\n" % atlas_height
-atlas_h += "static const uint32_t atlas_data[ATLAS_WIDTH*ATLAS_HEIGHT] = {\n"
+atlas_h += "static const uint32_t g_atlas_data[ATLAS_WIDTH*ATLAS_HEIGHT] = {\n"
 for i in range(0, len(atlas_data), 4):
     atlas_h += "0x%02x%02x%02x%02x," % (atlas_data[i + 3], atlas_data[i + 2], atlas_data[i + 1], atlas_data[i + 0])
 atlas_h += "\n};\n\n"
-atlas_h += "static const struct v2 atlas_sprite_positions[SPRITES_AMOUNT] = {\n"
+atlas_h += "static const struct v2 g_atlas_sprite_positions[SPRITES_AMOUNT] = {\n"
 for info in sprite_infos:
     atlas_h += "  { %d.0f * ATLAS_PIXEL_W, %d.0f * ATLAS_PIXEL_H },\n" % (info["x"], info["y"])
 atlas_h += "};\n\n"
-atlas_h += "static const struct v2 atlas_sprite_sizes[SPRITES_AMOUNT] = {\n"
+atlas_h += "static const struct v2 g_atlas_sprite_sizes[SPRITES_AMOUNT] = {\n"
 for info in sprite_infos:
     atlas_h += "  { %d.0f * ATLAS_PIXEL_W, %d.0f * ATLAS_PIXEL_H },\n" % (info["w"], info["h"])
 atlas_h += "};\n\n"
-atlas_h += "static const struct v2 atlas_sprite_half_sizes[SPRITES_AMOUNT] = {\n"
+atlas_h += "static const struct v2 g_atlas_sprite_half_sizes[SPRITES_AMOUNT] = {\n"
 for info in sprite_infos:
     w = "%g" % (info["w"] * 0.5)
     if "." not in w:

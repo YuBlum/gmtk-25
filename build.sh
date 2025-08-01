@@ -14,7 +14,6 @@ INCS="\
 -I./vendor/glfw/ \
 -I./include/ \
 -I./vendor/glad/include \
--I./vendor/stb_image \
 -I./vendor/miniaudio \
 "
 
@@ -23,7 +22,6 @@ if [ "$1" = "win" ]; then
   SRCS+=" ./src/engine/x64win.c"
   LIBS+="\
 vendor/glad/win-glad.o \
-vendor/stb_image/win-stb_image.o \
 vendor/miniaudio/win-miniaudio.o \
 -static-libgcc \
 -lwin-glfw3 \
@@ -38,7 +36,6 @@ elif [ "$1" = "lin" ]; then
   SRCS+=" ./src/engine/x64lin.c"
   LIBS+="\
 vendor/glad/lin-glad.o \
-vendor/stb_image/lin-stb_image.o \
 vendor/miniaudio/lin-miniaudio.o \
 -llin-glfw3 \
 -lm \

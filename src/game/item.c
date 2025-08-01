@@ -137,10 +137,10 @@ item_update(struct item_data *self, float dt) {
 
 void
 item_render(struct item_data *self) {
-  renderer_request_quads(
+  renderer_request_sprites(
     self->amount,
-    self->position,
     self->sprite,
+    self->position,
     0, 0, 0, 0, 0,
     self->depth,
     self->flash
