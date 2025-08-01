@@ -36,9 +36,23 @@ item_push(struct item_data *self, enum item_type type, struct v2 position) {
 }
 
 void
-item_pop(struct item_data *self, uint32_t index) {
-  (void)self; (void)index;
-  log_warnlf("%s: not implemented yet", __func__);
+item_remove(struct item_data *self, uint32_t index) {
+  if (index > self->amount) {
+    log_warnlf("%s: index '%u' bigger than the items amount", __func__, index);
+    return;
+  }
+  static_assert(sizeof (struct item_data) == sizeof (void *) * 10 + 8, "update the item removal, missing fields or a field was removed");
+  uint32_t i, max = --self->amount;
+  for (i = index; i < max; i++) self->position[i]        = self->position[i + 1];
+  for (i = index; i < max; i++) self->sprite[i]          = self->sprite[i + 1];
+  for (i = index; i < max; i++) self->depth[i]           = self->depth[i + 1];
+  for (i = index; i < max; i++) self->flash[i]           = self->flash[i + 1];
+  for (i = index; i < max; i++) self->size[i]            = self->size[i + 1];
+  for (i = index; i < max; i++) self->flash_target[i]    = self->flash_target[i + 1];
+  for (i = index; i < max; i++) self->position_target[i] = self->position_target[i + 1];
+  for (i = index; i < max; i++) self->launch_velocity[i] = self->launch_velocity[i + 1];
+  for (i = index; i < max; i++) self->next_position[i]   = self->next_position[i + 1];
+  for (i = index; i < max; i++) self->type[i]            = self->type[i + 1];
 }
 
 void
@@ -55,22 +69,15 @@ item_update(struct item_data *self, float dt) {
     static_assert(sizeof (struct item_data) == sizeof (void *) * 10 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
-       * the 'launch_velocity', 'next_position' and 'position_target' fields don't need to be added to the swapping
-       * 'depth' field also isn't needed because of the code line above */
+       * the 'launch_velocity', 'next_position', 'position_target' and 'depth' fields don't need to be added to the swapping */
     auto type             = self->type[i];
     auto position         = self->position[i];
     auto sprite           = self->sprite[i];
     auto size             = self->size[i];
     auto flash            = self->flash[i];
     auto flash_target     = self->flash_target[i];
-    for (uint32_t j = i; j < self->amount - 1; j++) {
-      self->type[j]             = self->type[j + 1];
-      self->position[j]         = self->position[j + 1];
-      self->sprite[j]           = self->sprite[j + 1];
-      self->size[j]             = self->size[j + 1];
-      self->flash[j]            = self->flash[j + 1];
-      self->flash_target[j]     = self->flash_target[j + 1];
-    }
+    item_remove(self, i);
+    self->amount++;
     self->type[self->amount - 1]             = type;
     self->position[self->amount - 1]         = position;
     self->sprite[self->amount - 1]           = sprite;
