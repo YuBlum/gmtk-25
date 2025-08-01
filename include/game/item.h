@@ -17,6 +17,7 @@ struct item_data {
   struct v2 *next_position;
   enum item_type *type;
   float *timer_to_die;
+  int32_t *box_index;
   uint32_t capacity;
   uint32_t amount;
 };

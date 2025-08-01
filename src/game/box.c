@@ -18,8 +18,8 @@ box_init(struct box_data *self) {
   for (i = 0; i < self->amount; i++) self->size[i] = V2(1.5f, 1.5f);
   for (i = 0; i < self->amount; i++) self->depth[i] = 1.0f;
   for (i = 0; i < self->amount; i++) self->flash[i] = 0.0f;
-  for (i = 0; i < self->amount; i++) self->item_held_type[i] = ITEM_NONE;
-  for (i = 0; i < self->amount; i++) self->item_held_index[i] = -1;
+  for (i = 0; i < self->amount; i++) self->item_drop_type[i] = ITEM_NONE;
+  for (i = 0; i < self->amount; i++) self->can_drop[i] = false;
   g_block_btn = false;
 }
 
@@ -31,25 +31,23 @@ box_update(struct box_data *self, float dt) {
   int32_t target = flash_update_target(self->amount, self->flash_target, self->flash, self->position, self->size);
   if (target != -1) {
     if (player->item_held == -1) {
-      if (self->item_held_type[target] == ITEM_NONE) {
+      if (self->item_drop_type[target] == ITEM_NONE) {
         self->flash_target[target] = 0.0f;
-      } else if (window_is_key_press(K_A)) {
-        //player->item_held = item->amount;
-        //item_push(item, self->item_held[spawn_item_from], self->position[spawn_item_from]);
-        //item->depth[player->item_held] = player->depth - 1.0f;
-        //self->item_held[spawn_item_from] = ITEM_NONE;
-        //spawn_item_from = -1;
-        //g_block_btn = true;
+      } else if (window_is_key_press(K_A) && self->can_drop[target]) {
+        player->item_held = item->amount;
+        item_push(item, self->item_drop_type[target], self->position[target]);
+        item->depth[player->item_held] = player->depth - 1.0f;
+        self->item_drop_type[target] = ITEM_NONE;
+        g_block_btn = true;
       }
     } else {
-      if (self->item_held_type[target] != ITEM_NONE) {
+      if (self->item_drop_type[target] != ITEM_NONE) {
         self->flash_target[target] = 0.0f;
       } else if (window_is_key_press(K_A)) {
-        item->position_target[player->item_held] = self->position[target];
         item->launch_velocity[player->item_held] = v2_muls(v2_unit(v2_sub(self->position[target], item->position[player->item_held])), 0.4f);
         item->timer_to_die[player->item_held] = 1.0f;
-        self->item_held_type[target] = item->type[player->item_held];
-        self->item_held_index[target] = player->item_held;
+        item->box_index[player->item_held] = target;
+        self->item_drop_type[target] = item->type[player->item_held];
         player->item_held = -1;
         g_block_btn = true;
       }

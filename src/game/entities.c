@@ -62,14 +62,14 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate box flash_target data");
       return false;
     }
-    g_entities.box_data.item_held_type = arena_push_array(g_entities.arena, false, enum item_type, layout->box_capacity);
-    if (!g_entities.box_data.item_held_type) {
-      log_errorl("couldn't allocate box item_held_type data");
+    g_entities.box_data.item_drop_type = arena_push_array(g_entities.arena, false, enum item_type, layout->box_capacity);
+    if (!g_entities.box_data.item_drop_type) {
+      log_errorl("couldn't allocate box item_drop_type data");
       return false;
     }
-    g_entities.box_data.item_held_index = arena_push_array(g_entities.arena, false, int32_t, layout->box_capacity);
-    if (!g_entities.box_data.item_held_index) {
-      log_errorl("couldn't allocate box item_held_index data");
+    g_entities.box_data.can_drop = arena_push_array(g_entities.arena, false, bool, layout->box_capacity);
+    if (!g_entities.box_data.can_drop) {
+      log_errorl("couldn't allocate box can_drop data");
       return false;
     }
     box_init(&g_entities.box_data);
@@ -132,6 +132,11 @@ entities_layout_set(const struct entities_layout *layout) {
     g_entities.item_data.timer_to_die = arena_push_array(g_entities.arena, false, float, layout->item_capacity);
     if (!g_entities.item_data.timer_to_die) {
       log_errorl("couldn't allocate item timer_to_die data");
+      return false;
+    }
+    g_entities.item_data.box_index = arena_push_array(g_entities.arena, false, int32_t, layout->item_capacity);
+    if (!g_entities.item_data.box_index) {
+      log_errorl("couldn't allocate item box_index data");
       return false;
     }
   } else {
