@@ -33,19 +33,9 @@ static const struct v2 g_map_default_room_items_position[2] = {
   { 240.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
 };
 
-static const struct v2 g_map_default_room_items_size[2] = {
-  { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
-  { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
-};
-
 static const struct v2 g_map_default_room_boxes_position[2] = {
   { 64.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
   { 256.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
-};
-
-static const struct v2 g_map_default_room_boxes_size[2] = {
-  { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
-  { 0.0/UNIT_PER_PIXEL, 0.0/UNIT_PER_PIXEL },
 };
 
 static const struct {
@@ -54,9 +44,7 @@ static const struct {
   const struct v2 *solids_position;
   const struct v2 *solids_size;
   const struct v2 *items_position;
-  const struct v2 *items_size;
   const struct v2 *boxes_position;
-  const struct v2 *boxes_size;
   uint32_t solids_amount;
   uint32_t items_amount;
   uint32_t boxes_amount;
@@ -871,10 +859,8 @@ static const struct {
     .solids_size     = g_map_default_room_solids_size,
     .solids_amount   = 8,
     .items_position = g_map_default_room_items_position,
-    .items_size     = g_map_default_room_items_size,
     .items_amount   = 2,
     .boxes_position = g_map_default_room_boxes_position,
-    .boxes_size     = g_map_default_room_boxes_size,
     .boxes_amount   = 2,
     .tileset = SPR_ROOM_TILESET,
   },

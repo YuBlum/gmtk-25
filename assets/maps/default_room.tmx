@@ -30,7 +30,7 @@
  </layer>
  <objectgroup id="2" name="solids">
   <properties>
-   <property name="manual-center" value=""/>
+   <property name="has-size" type="bool" value="true"/>
   </properties>
   <object id="5" x="0" y="0" width="16" height="320"/>
   <object id="6" x="304" y="0" width="16" height="320"/>

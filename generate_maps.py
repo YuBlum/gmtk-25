@@ -65,21 +65,30 @@ for name, map in zip(names, maps_json):
                 for t in tile_ids
             ]
         elif layer["type"] == "objectgroup":
-            if not layer["name"] in all_entity_types:
-                all_entity_types[layer["name"]] = layer["name"]
-            manual_center = False
+            has_size = False
             if "properties" in layer:
                 for p in layer["properties"]:
-                    if p["name"] == "manual-center":
-                        manual_center = True
+                    if p["name"] == "has-size":
+                        if p["type"] != "bool":
+                            print("'has-size' property has to be a boolean, but in layer '", layer["name"], "' it's a '", p["type"], "'", sep="")
+                            exit(1)
+                        has_size = p["value"]
+            if not layer["name"] in all_entity_types:
+                all_entity_types[layer["name"]] = {
+                    "has-size": has_size,
+                }
+            elif all_entity_types[layer["name"]]["has-size"] != has_size:
+                print("some maps have 'has-size' on '", layer["name"], "', but map '", name, "' don't", sep="")
+                exit(1)
             m["entity_types"].append({
+                "has-size": has_size,
                 "type": layer["name"],
                 "entities": [
                     {
-                        "x": o["x"] + (o["width"]  * 0.5 if manual_center else 0),
-                        "y": o["y"] + (o["height"] * 0.5 if manual_center else 0),
-                        "w": o["width"],
-                        "h": o["height"]
+                        "x": o["x"] + (o["width"]  * 0.5 if has_size else 0),
+                        "y": o["y"] + (o["height"] * 0.5 if has_size else 0),
+                        "w": 0 if not has_size else o["width"],
+                        "h": 0 if not has_size else o["height"]
                     }
                     for o in layer["objects"]
                 ]
@@ -124,24 +133,26 @@ for m in maps:
                     y += ".0"
                 maps_data_h += "  { " + x + "/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (" + y + "/UNIT_PER_PIXEL) },\n"
             maps_data_h += "};\n\n"
-            maps_data_h += "static const struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_size[%d] = {\n" % len(t["entities"]))
-            for e in t["entities"]:
-                w = "%g" % e["w"]
-                if "." not in w:
-                    w += ".0"
-                h = "%g" % e["h"]
-                if "." not in h:
-                    h += ".0"
-                maps_data_h += "  { " + w + "/UNIT_PER_PIXEL, " + h + "/UNIT_PER_PIXEL },\n"
-            maps_data_h += "};\n\n"
+            if t["has-size"]:
+                maps_data_h += "static const struct v2 g_map_" + m["name"] + "_" + t["type"] + ("_size[%d] = {\n" % len(t["entities"]))
+                for e in t["entities"]:
+                    w = "%g" % e["w"]
+                    if "." not in w:
+                        w += ".0"
+                    h = "%g" % e["h"]
+                    if "." not in h:
+                        h += ".0"
+                    maps_data_h += "  { " + w + "/UNIT_PER_PIXEL, " + h + "/UNIT_PER_PIXEL },\n"
+                maps_data_h += "};\n\n"
 maps_data_h += "static const struct {\n"
 maps_data_h += "  struct v2 tiles_position[MAP_TILES_AMOUNT];\n"
 maps_data_h += "  struct v2u tiles_sprite_position[MAP_TILES_AMOUNT];\n"
-for t in all_entity_types:
-    maps_data_h += "  const struct v2 *" + t + "_position;\n"
-    maps_data_h += "  const struct v2 *" + t + "_size;\n"
-for t in all_entity_types:
-    maps_data_h += "  uint32_t " + t + "_amount;\n"
+for name, props in all_entity_types.items():
+    maps_data_h += "  const struct v2 *" + name + "_position;\n"
+    if props["has-size"]:
+        maps_data_h += "  const struct v2 *" + name + "_size;\n"
+for name in all_entity_types.keys():
+    maps_data_h += "  uint32_t " + name + "_amount;\n"
 maps_data_h += "  enum sprite tileset;\n"
 maps_data_h += "} g_maps_data[MAPS_AMOUNT] = {\n"
 for m in maps:
@@ -155,20 +166,22 @@ for m in maps:
     for tile in m["tiles"]:
         maps_data_h += "      { %d, %d },\n" % (tile["x"], tile["y"])
     maps_data_h += "    },\n"
-    for t in all_entity_types:
+    for name, props in all_entity_types.items():
         type_index = -1
         for i, map_t in enumerate(m["entity_types"]):
-            if map_t["type"] == t:
+            if map_t["type"] == name:
                 type_index = i
                 break
         if type_index != -1:
-            maps_data_h += "    ." + t + "_position = g_map_" + m["name"] + "_" + t + "_position,\n"
-            maps_data_h += "    ." + t + "_size     = g_map_" + m["name"] + "_" + t + "_size,\n"
-            maps_data_h += "    ." + t + "_amount   = %d,\n" % len(m["entity_types"][type_index]["entities"])
+            maps_data_h += "    ." + name + "_position = g_map_" + m["name"] + "_" + name + "_position,\n"
+            if props["has-size"]:
+                maps_data_h += "    ." + name + "_size     = g_map_" + m["name"] + "_" + name + "_size,\n"
+            maps_data_h += "    ." + name + "_amount   = %d,\n" % len(m["entity_types"][type_index]["entities"])
         else:
-            maps_data_h += "    ." + t + "_position = 0,\n"
-            maps_data_h += "    ." + t + "_size     = 0,\n"
-            maps_data_h += "    ." + t + "_amount   = 0,\n"
+            maps_data_h += "    ." + name + "_position = 0,\n"
+            if props["has-size"]:
+                maps_data_h += "    ." + name + "_size     = 0,\n"
+            maps_data_h += "    ." + name + "_amount   = 0,\n"
     maps_data_h += "    .tileset = " + m["tileset"] + ",\n"
     maps_data_h += "  },\n"
 maps_data_h += "};\n\n"

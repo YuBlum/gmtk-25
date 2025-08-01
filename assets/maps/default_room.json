@@ -129,9 +129,9 @@
          "opacity":1,
          "properties":[
                 {
-                 "name":"manual-center",
-                 "type":"string",
-                 "value":""
+                 "name":"has-size",
+                 "type":"bool",
+                 "value":true
                 }],
          "type":"objectgroup",
          "visible":true,
