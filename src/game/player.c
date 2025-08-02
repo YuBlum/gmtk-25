@@ -82,6 +82,7 @@ player_update(struct player_data *self, float dt) {
       auto item = entities_get_item_data();
       global.extra_item_type     = item->type[self->item_held];
       global.extra_item_position = v2_sub(item->position[self->item_held], V2(0.0f, GAME_H));
+      global.extra_item_sprite   = item->sprite[self->item_held];
     }
     auto box = entities_get_box_data();
     switch (box->item_drop_type[global.layout_box]) {

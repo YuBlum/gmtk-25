@@ -11,7 +11,8 @@ global_init(void) {
       sizeof (enum item_type)*2   +
       sizeof (struct v2)          +
       sizeof (int32_t)*2          +
-      sizeof (enum room_layout),
+      sizeof (enum room_layout)   +
+      sizeof (enum sprite),
     "added global variable but didn't set it up"
   );
   global.player_state.sprite        = SPR_PLAYER;
@@ -27,6 +28,7 @@ global_init(void) {
   global.player_state.depth         = 0.0f;
   global.player_state.item_held     = -1;
   global.extra_item_type     = ITEM_NONE;
+  global.extra_item_sprite   = 0;
   global.extra_item_position = V2S(0.0f);
   global.next_item_type = ITEM_LOCK;
   global.next_room_layout = ROOM_DEFAULT;

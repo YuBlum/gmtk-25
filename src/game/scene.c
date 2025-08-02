@@ -78,6 +78,7 @@ scene_load(enum map map) {
     item_push(item, global.extra_item_type, global.extra_item_position, player->scale.x < 0.0f, false, 0.0f);
     item->position_target[player->item_held] = player->position;
     item->depth[player->item_held] = player->depth - 1.0f;
+    item->sprite[player->item_held] = global.extra_item_sprite;
     global.extra_item_type = ITEM_NONE;
   }
   auto box = entities_get_box_data();
