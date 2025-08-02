@@ -8,6 +8,7 @@
 struct door_data {
   struct v2 position;
   struct v2 size;
+  struct v2 origin;
   bool locked;
   struct v2 left;
   struct v2 right;

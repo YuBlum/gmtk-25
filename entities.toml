@@ -9,21 +9,10 @@ field.item_held     = "int32_t"
 
 [entity.unique.door]
 component = [ "collidable" ]
+field.origin = "struct v2"
 field.locked = "bool"
 field.left   = "struct v2"
 field.right  = "struct v2"
-
-[entity.unique.box_room]
-has_update = false
-field.position = "struct v2"
-
-[entity.unique.rope_room]
-has_update = false
-field.position = "struct v2"
-
-[entity.unique.mirror_room]
-has_update = false
-field.position = "struct v2"
 
 # the 'box' entity type has to come before the 'item' one 
 [entity.box]
