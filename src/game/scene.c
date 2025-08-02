@@ -35,11 +35,12 @@ scene_load(enum map map) {
   uint32_t trash_amount = g_scene.layout == ROOM_TRASH || g_scene.layout == ROOM_CLEANED_TRASH ? TRASH_AMOUNT : 0;
   layout.has_player = true;
   layout.has_door = true;
-  layout.solid_capacity = (g_scene.layout == ROOM_LOCK   ||
-                           g_scene.layout == ROOM_BOX    ||
-                           g_scene.layout == ROOM_ROPE   ||
-                           g_scene.layout == ROOM_MIRROR ||
-                           g_scene.layout == ROOM_BROKEN_MIRROR) + g_maps_data[map].solids_amount;
+  layout.solid_capacity = (g_scene.layout == ROOM_LOCK          ||
+                           g_scene.layout == ROOM_BOX           ||
+                           g_scene.layout == ROOM_ROPE          ||
+                           g_scene.layout == ROOM_MIRROR        ||
+                           g_scene.layout == ROOM_BROKEN_MIRROR ||
+                           g_scene.layout == ROOM_CUT_ROPE) + (g_scene.layout == ROOM_CUT_ROPE) + g_maps_data[map].solids_amount;
   layout.item_capacity = items_amount + trash_amount + has_extra_item;
   layout.box_capacity = g_maps_data[map].boxes_amount;
   g_scene.current_map = map;
@@ -128,6 +129,12 @@ scene_load(enum map map) {
       solid->position[solid->amount-1] = V2(0.0f, ROPE_Y);
       solid->size[solid->amount-1] = V2(18.0f, 0.5f);
     } break;
+    case ROOM_CUT_ROPE: {
+      solid->position[solid->amount-2] = V2(-GAME_W * 0.25f, ROPE_Y);
+      solid->size[solid->amount-2] = V2(8.0f, 0.5f);
+      solid->position[solid->amount-1] = V2(GAME_W * 0.25f, ROPE_Y);
+      solid->size[solid->amount-1] = V2(8.0f, 0.5f);
+    } break;
     case ROOM_MIRROR:
     case ROOM_BROKEN_MIRROR: {
       solid->position[solid->amount-1] = V2(0.0f, MIRROR_Y);
@@ -176,23 +183,13 @@ scene_update(float dt) {
   renderer_set_offset(g_scene.offset);
 }
 
+#define ROPE_DEFAULT_FROM (-GAME_W * 0.5f + 1.5f)
+#define ROPE_DEFAULT_TO   (GAME_W * 0.5f - 1.0f)
 static void
-rope_render(float y) {
-  struct v2 pos = V2(-GAME_W * 0.5f + 1.5f, y);
-  renderer_request_sprite_slice(
-    SPR_ROPE_ROOM,
-    V2U(0, 0),
-    V2U(16, 8),
-    pos,
-    V2S(0.0f),
-    0.0f,
-    V2S(1.0f),
-    WHITE,
-    1.0f,
-    0.1f,
-    0.0f
-  );
-  for (pos.x++; pos.x < GAME_W * 0.5f - 2.0f; pos.x++) {
+rope_render(float y, float from, float to) {
+  struct v2 pos = V2(from, y);
+  pos.y = y;
+  for (pos.x = from; pos.x < to; pos.x++) {
     renderer_request_sprite_slice(
       SPR_ROPE_ROOM,
       V2U(16, 0),
@@ -207,11 +204,30 @@ rope_render(float y) {
       0.0f
     );
   }
+}
+
+static void
+cut_rope_render(float y) {
+  rope_render(y, ROPE_DEFAULT_FROM, -2.0f);
   renderer_request_sprite_slice(
     SPR_ROPE_ROOM,
     V2U(32, 0),
     V2U(16, 8),
-    pos,
+    V2(-1.5f, y),
+    V2S(0.0f),
+    0.0f,
+    V2S(1.0f),
+    WHITE,
+    1.0f,
+    0.1f,
+    0.0f
+  );
+  rope_render(y, +2.5f, ROPE_DEFAULT_TO);
+  renderer_request_sprite_slice(
+    SPR_ROPE_ROOM,
+    V2U(0, 0),
+    V2U(16, 8),
+    V2(+1.5f, y),
     V2S(0.0f),
     0.0f,
     V2S(1.0f),
@@ -244,7 +260,10 @@ scene_render(void) {
           renderer_request_sprite(SPR_OPENED_BOX, V2(0.0f, BOX_Y + GAME_H), BOX_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
         } break;
         case ROOM_ROPE: {
-          rope_render(ROPE_Y + GAME_H);
+          rope_render(ROPE_Y + GAME_H, ROPE_DEFAULT_FROM, ROPE_DEFAULT_TO);
+        } break;
+        case ROOM_CUT_ROPE: {
+          cut_rope_render(ROPE_Y + GAME_H);
         } break;
         case ROOM_MIRROR: {
           renderer_request_sprite(SPR_MIRROR_ROOM, V2(0.0f, MIRROR_Y + GAME_H), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
@@ -260,7 +279,10 @@ scene_render(void) {
     }
   } else switch (g_scene.layout) {
     case ROOM_ROPE: {
-      rope_render(ROPE_Y);
+      rope_render(ROPE_Y, ROPE_DEFAULT_FROM, ROPE_DEFAULT_TO);
+    } break;
+    case ROOM_CUT_ROPE: {
+      cut_rope_render(ROPE_Y);
     } break;
     case ROOM_BOX: {
       renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y), BOX_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f,

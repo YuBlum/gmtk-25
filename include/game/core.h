@@ -36,7 +36,8 @@ enum room_layout {
   ROOM_MIRROR,
   ROOM_BROKEN_MIRROR,
   ROOM_OPENED_BOX,
-  ROOM_CLEANED_TRASH
+  ROOM_CLEANED_TRASH,
+  ROOM_CUT_ROPE
 };
 
 void item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip, bool spawn_transition, float spawn_transition_speed);
