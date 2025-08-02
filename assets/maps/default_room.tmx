@@ -28,7 +28,7 @@
 5,9,9,9,9,9,9,10,4,4,3,3,11,9,9,9,9,9,9,6
 </data>
  </layer>
- <objectgroup id="2" name="solids">
+ <objectgroup id="2" name="solids" locked="1">
   <properties>
    <property name="has-size" type="bool" value="true"/>
   </properties>
@@ -41,23 +41,22 @@
   <object id="17" x="52" y="52" width="24" height="24"/>
   <object id="18" x="244" y="52" width="24" height="24"/>
  </objectgroup>
- <objectgroup id="3" name="items" locked="1">
-  <properties>
-   <property name="type" value="enum item_type"/>
-  </properties>
-  <object id="12" x="80" y="160">
-   <properties>
-    <property name="type" value="ITEM_TEST"/>
-   </properties>
-  </object>
-  <object id="13" x="240" y="160">
-   <properties>
-    <property name="type" value="ITEM_TEST2"/>
-   </properties>
-  </object>
+ <objectgroup id="3" name="items">
+  <object id="12" x="160" y="160"/>
  </objectgroup>
- <objectgroup id="4" name="boxes" locked="1">
-  <object id="15" x="64" y="64"/>
-  <object id="16" x="256" y="64"/>
+ <objectgroup id="4" name="boxes">
+  <properties>
+   <property name="type" value="enum box_type"/>
+  </properties>
+  <object id="15" x="64" y="64">
+   <properties>
+    <property name="type" value="BOX_LAYOUT"/>
+   </properties>
+  </object>
+  <object id="16" x="256" y="64">
+   <properties>
+    <property name="type" value="BOX_CONTENT"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

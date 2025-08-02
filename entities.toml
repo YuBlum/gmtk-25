@@ -11,6 +11,7 @@ field.item_held     = "int32_t"
 [entity.box]
 component = [ "renderable", "collidable", "flashable" ]
 exclude   = [ "scale", "origin", "angle", "color", "opacity" ]
+field.type = "enum box_type"
 field.item_drop_type = "enum item_type"
 field.can_drop  = "bool"
 

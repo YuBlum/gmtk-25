@@ -2,10 +2,11 @@
 - [x] Walls
 - [x] Boxes
 - [ ] Door
-- [ ] Pass to next room state
-- [ ] Design items
-- [ ] Item usage
-- [ ] Design exit route
+- [x] Pass to next room state
+- [x] Can move items between room states
+- [x] Design items
+- [x] Item usage
+- [x] Design exit route
 - [ ] Art
 - [ ] Sfx
 - [ ] Ending

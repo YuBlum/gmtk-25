@@ -6,6 +6,10 @@
 
 struct global {
   struct player_data player_state;
+  struct v2 extra_item_position;
+  enum item_type extra_item_type;
+  enum item_type next_item_type;
+  int32_t layout_box, content_box;
 };
 
 extern struct global global;

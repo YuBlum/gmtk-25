@@ -3,6 +3,7 @@
 #include "engine/window.h"
 #include "engine/core.h"
 #include "engine/collision.h"
+#include "engine/scenes.h"
 
 #define FOLLOW_SPEED 14.0f
 #define LAUNCH_MIN_SPEED 0.1f
@@ -66,6 +67,7 @@ item_remove(struct item_data *self, uint32_t index) {
 
 void
 item_update(struct item_data *self, float dt) {
+  if (scene_is_in_transition()) return;
   if (!self->amount) return;
   bool interacting = window_is_key_press(K_A) && !box_blocked_button();
   auto player = entities_get_player_data();

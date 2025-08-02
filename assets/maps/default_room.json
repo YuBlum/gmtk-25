@@ -25,6 +25,7 @@
             5, 9, 9, 9, 9, 9, 9, 10, 4, 4, 3, 3, 11, 9, 9, 9, 9, 9, 9, 6],
          "height":20,
          "id":1,
+         "locked":true,
          "name":"map",
          "opacity":1,
          "type":"tilelayer",
@@ -36,6 +37,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"solids",
          "objects":[
                 {
@@ -147,43 +149,14 @@
                  "height":0,
                  "id":12,
                  "name":"",
-                 "properties":[
-                        {
-                         "name":"type",
-                         "type":"string",
-                         "value":"ITEM_TEST"
-                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":80,
-                 "y":160
-                }, 
-                {
-                 "height":0,
-                 "id":13,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"type",
-                         "type":"string",
-                         "value":"ITEM_TEST2"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":240,
+                 "x":160,
                  "y":160
                 }],
          "opacity":1,
-         "properties":[
-                {
-                 "name":"type",
-                 "type":"string",
-                 "value":"enum item_type"
-                }],
          "type":"objectgroup",
          "visible":true,
          "x":0,
@@ -192,13 +165,18 @@
         {
          "draworder":"topdown",
          "id":4,
-         "locked":true,
          "name":"boxes",
          "objects":[
                 {
                  "height":0,
                  "id":15,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"BOX_LAYOUT"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -210,6 +188,12 @@
                  "height":0,
                  "id":16,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"BOX_CONTENT"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -218,6 +202,12 @@
                  "y":64
                 }],
          "opacity":1,
+         "properties":[
+                {
+                 "name":"type",
+                 "type":"string",
+                 "value":"enum box_type"
+                }],
          "type":"objectgroup",
          "visible":true,
          "x":0,

@@ -29,19 +29,18 @@ static const struct v2 g_map_default_room_solids_size[8] = {
   { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
 };
 
-static const struct v2 g_map_default_room_items_position[2] = {
-  { 80.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
-  { 240.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
-};
-
-static const enum item_type g_map_default_room_items_type[2] = {
-  ITEM_TEST,
-  ITEM_TEST2,
+static const struct v2 g_map_default_room_items_position[1] = {
+  { 160.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
 };
 
 static const struct v2 g_map_default_room_boxes_position[2] = {
   { 64.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
   { 256.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
+};
+
+static const enum box_type g_map_default_room_boxes_type[2] = {
+  BOX_LAYOUT,
+  BOX_CONTENT,
 };
 
 static const struct {
@@ -50,8 +49,8 @@ static const struct {
   const struct v2 *solids_position;
   const struct v2 *solids_size;
   const struct v2 *items_position;
-  const enum item_type *items_type;
   const struct v2 *boxes_position;
+  const enum box_type *boxes_type;
   uint32_t solids_amount;
   uint32_t items_amount;
   uint32_t boxes_amount;
@@ -866,9 +865,9 @@ static const struct {
     .solids_size     = g_map_default_room_solids_size,
     .solids_amount   = 8,
     .items_position = g_map_default_room_items_position,
-    .items_type     = g_map_default_room_items_type,
-    .items_amount   = 2,
+    .items_amount   = 1,
     .boxes_position = g_map_default_room_boxes_position,
+    .boxes_type     = g_map_default_room_boxes_type,
     .boxes_amount   = 2,
     .tileset = SPR_ROOM_TILESET,
   },

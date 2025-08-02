@@ -5,9 +5,12 @@ struct global global;
 
 void
 global_init(void) {
-  //static_assert(sizeof (struct global) == 20, "added global variable but didn't set it up");
+  static_assert(
+    sizeof (struct global) == sizeof (struct player_data) + sizeof (enum item_type)*2 + sizeof (struct v2) + sizeof (int32_t)*2,
+    "added global variable but didn't set it up"
+  );
   global.player_state.sprite        = SPR_PLAYER;
-  global.player_state.position      = V2(0.00f, 0.00f);
+  global.player_state.position      = V2(0.00f, -4.00f);
   global.player_state.size          = V2(1.00f, 0.75f);
   global.player_state.scale         = V2(1.00f, 1.00f);
   global.player_state.origin        = V2(0.00f, 0.45f);
@@ -18,4 +21,9 @@ global_init(void) {
   global.player_state.wiggle_target = 0.0f;
   global.player_state.depth         = 0.0f;
   global.player_state.item_held     = -1;
+  global.extra_item_type     = ITEM_NONE;
+  global.extra_item_position = V2S(0.0f);
+  global.next_item_type = ITEM_TEST;
+  global.layout_box  = -1;
+  global.content_box = -1;
 }

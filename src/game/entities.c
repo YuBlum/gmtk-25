@@ -62,6 +62,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate box flash_target data");
       return false;
     }
+    g_entities.box_data.type = arena_push_array(g_entities.arena, false, enum box_type, layout->box_capacity);
+    if (!g_entities.box_data.type) {
+      log_errorl("couldn't allocate box type data");
+      return false;
+    }
     g_entities.box_data.item_drop_type = arena_push_array(g_entities.arena, false, enum item_type, layout->box_capacity);
     if (!g_entities.box_data.item_drop_type) {
       log_errorl("couldn't allocate box item_drop_type data");

@@ -13,7 +13,6 @@ struct player_data {
   float angle;
   float depth;
   struct v2 size;
-  struct v2 direction;
   struct v2 interact_pos;
   float interact_rad;
   float wiggle_cur;

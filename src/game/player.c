@@ -75,11 +75,27 @@ player_update(struct player_data *self, float dt) {
   }
   self->angle = self->wiggle_cur * 0.5f;
   if (self->position.y - self->size.y * 0.5f > GAME_H * 0.5f) {
-    global.player_state.position      = V2(self->position.x, self->position.y - GAME_H);
+    global.player_state.position      = v2_sub(self->position, V2(0.0f, GAME_H));
     global.player_state.scale         = self->scale;
-    global.player_state.angle         = self->angle;
     global.player_state.wiggle_cur    = self->wiggle_cur;
     global.player_state.wiggle_target = self->wiggle_target;
+    if (self->item_held != -1) {
+      auto item = entities_get_item_data();
+      global.extra_item_type     = item->type[self->item_held];
+      global.extra_item_position = v2_sub(item->position[self->item_held], V2(0.0f, GAME_H));
+    }
+    auto box = entities_get_box_data();
+    switch (box->item_drop_type[global.content_box]) {
+      case ITEM_TEST:
+        global.next_item_type = ITEM_TEST2;
+        break;
+      case ITEM_TEST2:
+        global.next_item_type = ITEM_NONE;
+        break;
+      case ITEM_NONE:
+        global.next_item_type = ITEM_TEST;
+        break;
+    }
     scene_transition_to(MAP_DEFAULT_ROOM);
   }
 }
