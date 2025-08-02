@@ -9,9 +9,7 @@ struct scene {
   enum map next_map;
   struct v2 offset;
   bool transition;
-  bool has_rope;
-  bool has_box;
-  bool has_mirror;
+  enum room_layout layout;
 };
 
 #define ROPE_Y -2.0f
@@ -29,24 +27,18 @@ scene_load(enum map map) {
   }
   #endif
   struct entities_layout layout = { 0 };
-  bool is_door_locked = global.next_room_layout == ROOM_LOCK;
-  g_scene.has_box    = global.next_room_layout == ROOM_BOX;
-  g_scene.has_rope   = global.next_room_layout == ROOM_ROPE;
-  g_scene.has_mirror = global.next_room_layout == ROOM_MIRROR;
+  g_scene.layout = global.next_room_layout;
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
   uint32_t items_amount = 0;
-  if (global.next_room_layout == ROOM_TRASH) {
-    items_amount = 1000;
-  } else if (global.next_item_type != ITEM_NONE) {
-    items_amount = g_maps_data[map].items_amount;
-  }
+  items_amount = g_scene.layout == ROOM_TRASH ? 1000 : global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
   layout.has_player = true;
   layout.has_door = true;
-  if (g_scene.has_box || g_scene.has_rope || g_scene.has_mirror) {
-    layout.solid_capacity = 1;
-  }
+  layout.solid_capacity = (g_scene.layout == ROOM_LOCK   ||
+                           g_scene.layout == ROOM_BOX    ||
+                           g_scene.layout == ROOM_ROPE   ||
+                           g_scene.layout == ROOM_MIRROR ||
+                           g_scene.layout == ROOM_BROKEN_MIRROR) + g_maps_data[map].solids_amount;
   layout.item_capacity = items_amount + has_extra_item;
-  layout.solid_capacity = g_maps_data[map].solids_amount + is_door_locked;
   layout.box_capacity = g_maps_data[map].boxes_amount;
   g_scene.current_map = map;
   g_scene.next_map = g_scene.current_map;
@@ -102,23 +94,28 @@ scene_load(enum map map) {
     solid->position[i] = g_maps_data[map].solids_position[i];
     solid->size[i] = g_maps_data[map].solids_size[i];
   }
-  if (is_door_locked) {
-    auto door = entities_get_door_data();
-    door->locked = true;
-    solid->position[solid->amount-1] = door->position;
-    solid->size[solid->amount-1] = door->size;
-  }
-  if (g_scene.has_box) {
-    solid->position[solid->amount-1] = V2(0.0f, BOX_Y);
-    solid->size[solid->amount-1] = V2(2.0f, 0.5f);
-  }
-  if (g_scene.has_rope) {
-    solid->position[solid->amount-1] = V2(0.0f, ROPE_Y);
-    solid->size[solid->amount-1] = V2(18.0f, 0.5f);
-  }
-  if (g_scene.has_mirror) {
-    solid->position[solid->amount-1] = V2(0.0f, MIRROR_Y);
-    solid->size[solid->amount-1] = V2(2.0f, 1.0f);
+  switch (g_scene.layout) {
+    case ROOM_LOCK: {
+      auto door = entities_get_door_data();
+      door->locked = true;
+      solid->position[solid->amount-1] = door->position;
+      solid->size[solid->amount-1] = door->size;
+    } break;
+    case ROOM_BOX: {
+      solid->position[solid->amount-1] = V2(0.0f, BOX_Y);
+      solid->size[solid->amount-1] = V2(2.0f, 0.5f);
+    } break;
+    case ROOM_ROPE: {
+      solid->position[solid->amount-1] = V2(0.0f, ROPE_Y);
+      solid->size[solid->amount-1] = V2(18.0f, 0.5f);
+    } break;
+    case ROOM_MIRROR:
+    case ROOM_BROKEN_MIRROR: {
+      solid->position[solid->amount-1] = V2(0.0f, MIRROR_Y);
+      solid->size[solid->amount-1] = V2(2.0f, 1.0f);
+    } break;
+    default: {
+    } break;
   }
   return true;
 }
@@ -209,6 +206,7 @@ rope_render(float y) {
 void
 scene_render(void) {
   auto map = &g_maps_data[g_scene.current_map];
+  auto player = entities_get_player_data();
   renderer_request_tileset(MAP_TILES_AMOUNT, map->tileset, V2S(0.0f), map->tiles_sprite_position, map->tiles_position, 0);
   if (g_scene.transition) {
     map = &g_maps_data[g_scene.next_map];
@@ -219,25 +217,42 @@ scene_render(void) {
     if (global.next_room_layout == ROOM_LOCK) {
       renderer_request_sprite(SPR_DOOR_LOCKED, v2_add(door->position, V2(0.0f, GAME_H)), door->origin, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
     } else {
-      if (global.next_room_layout == ROOM_BOX) {
-        renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y + GAME_H), V2(0.0f, 0.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
-      } else if (global.next_room_layout == ROOM_ROPE) {
-        rope_render(ROPE_Y + GAME_H);
-      } else if (global.next_room_layout == ROOM_MIRROR) {
-        renderer_request_sprite(SPR_MIRROR_ROOM, V2(0.0f, MIRROR_Y + GAME_H), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+      switch (global.next_room_layout) {
+        case ROOM_BOX: {
+          renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y + GAME_H), V2(0.0f, 0.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+        } break;
+        case ROOM_ROPE: {
+          rope_render(ROPE_Y + GAME_H);
+        } break;
+        case ROOM_MIRROR: {
+          renderer_request_sprite(SPR_MIRROR_ROOM, V2(0.0f, MIRROR_Y + GAME_H), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+        } break;
+        case ROOM_BROKEN_MIRROR: {
+          renderer_request_sprite(SPR_BROKEN_MIRROR, V2(0.0f, MIRROR_Y + GAME_H), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+        } break;
+        default: {
+        } break;
       }
       renderer_request_sprite(SPR_DOOR, v2_add(door->position, V2(-1.0f, GAME_H)), door->origin, 0.0f, V2(+1.0f, 1.0f), WHITE, 1.0f, 0.1f, 0.0f);
       renderer_request_sprite(SPR_DOOR, v2_add(door->position, V2(+1.0f, GAME_H)), door->origin, 0.0f, V2(-1.0f, 1.0f), WHITE, 1.0f, 0.1f, 0.0f);
     }
-  } else if (g_scene.has_rope) {
-    rope_render(ROPE_Y);
-  } else if (g_scene.has_box) {
-    auto player = entities_get_player_data();
-    renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y), V2(0.0f, 0.5f), 0.0f, V2S(1.0f), WHITE, 1.0f,
-                            player->position.y > BOX_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
-  } else if (g_scene.has_mirror) {
-    auto player = entities_get_player_data();
-    renderer_request_sprite(SPR_MIRROR_ROOM, V2(0.0f, MIRROR_Y), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f,
-                            player->position.y > MIRROR_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
+  } else switch (g_scene.layout) {
+    case ROOM_ROPE: {
+      rope_render(ROPE_Y);
+    } break;
+    case ROOM_BOX: {
+      renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y), V2(0.0f, 0.5f), 0.0f, V2S(1.0f), WHITE, 1.0f,
+                              player->position.y > BOX_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
+    } break;
+    case ROOM_MIRROR: {
+      renderer_request_sprite(SPR_MIRROR_ROOM, V2(0.0f, MIRROR_Y), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f,
+                              player->position.y > MIRROR_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
+    } break;
+    case ROOM_BROKEN_MIRROR: {
+      renderer_request_sprite(SPR_BROKEN_MIRROR, V2(0.0f, MIRROR_Y), V2(0.0f, 1.5f), 0.0f, V2S(1.0f), WHITE, 1.0f,
+                              player->position.y > MIRROR_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
+    } break;
+    default: {
+    } break;
   }
 }

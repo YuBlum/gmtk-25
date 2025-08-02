@@ -146,30 +146,21 @@ player_update(struct player_data *self, float dt) {
         log_warnl("missing solution");
       } break;
       case ITEM_MIRROR: {
-        global.next_room_layout = ROOM_MIRROR;
-        global.next_item_type = ITEM_NONE;
-        log_warnl("room layout not implemented");
+        switch (box->item_drop_type[global.content_box]) {
+          case ITEM_ROCK:
+            global.next_room_layout = ROOM_BROKEN_MIRROR;
+            global.next_item_type = ITEM_GLASS;
+            break;
+          default:
+            global.next_room_layout = ROOM_MIRROR;
+            global.next_item_type = ITEM_NONE;
+            break;
+        }
+        log_warnl("missing solution");
       } break;
-      case ITEM_ROCK: {
+      default:
         global.next_room_layout = ROOM_DEFAULT;
-        log_warnl("room layout not implemented");
-      } break;
-      case ITEM_GLASS: {
-        global.next_room_layout = ROOM_DEFAULT;
-        log_warnl("room layout not implemented");
-      } break;
-      case ITEM_BROOM: {
-        global.next_room_layout = ROOM_DEFAULT;
-        log_warnl("room layout not implemented");
-      } break;
-      case ITEM_KNIFE: {
-        global.next_room_layout = ROOM_DEFAULT;
-        log_warnl("room layout not implemented");
-      } break;
-      case ITEM_KEY: {
-        global.next_room_layout = ROOM_DEFAULT;
-        log_warnl("room layout not implemented");
-      } break;
+        break;
     }
     scene_transition_to(MAP_DEFAULT_ROOM);
   }
