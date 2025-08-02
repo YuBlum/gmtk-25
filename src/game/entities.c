@@ -82,6 +82,7 @@ entities_layout_set(const struct entities_layout *layout) {
     box_init(&g_entities.box_data);
   } else {
     g_entities.box_data.capacity = 0;
+    g_entities.box_data.amount   = 0;
   }
   if (layout->item_capacity) {
     g_entities.item_data.capacity = layout->item_capacity;
@@ -168,6 +169,7 @@ entities_layout_set(const struct entities_layout *layout) {
     }
   } else {
     g_entities.item_data.capacity = 0;
+    g_entities.item_data.amount   = 0;
   }
   if (layout->solid_capacity) {
     g_entities.solid_data.capacity = layout->solid_capacity;
@@ -184,6 +186,7 @@ entities_layout_set(const struct entities_layout *layout) {
     }
   } else {
     g_entities.solid_data.capacity = 0;
+    g_entities.solid_data.amount   = 0;
   }
   if (layout->has_player) {
     g_entities.player_data = arena_push_type(g_entities.arena, false, struct player_data);

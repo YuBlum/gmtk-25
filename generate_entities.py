@@ -187,6 +187,7 @@ for entity, (body, has_init, _, _) in entities_ir.items():
             entities_c += "    " + entity + "_init(&g_entities." + entity + "_data);\n"
         entities_c += "  } else {\n"
         entities_c += "    g_entities." + entity + "_data.capacity = 0;\n"
+        entities_c += "    g_entities." + entity + "_data.amount   = 0;\n"
         entities_c += "  }\n"
     else:
         entities_c += "  if (layout->has_" + entity + ") {\n"
