@@ -19,26 +19,11 @@ main(void) {
     log_errorl("couldn't make main temporary arena");
     return 1;
   }
-  if (!window_make(WINDOW_W, WINDOW_H)) return 1;
-  if (!mixer_make()) {
-    window_destroy();
-    return 1;
-  }
-  if (!renderer_make()) {
-    mixer_destroy();
-    window_destroy();
-    return 1;
-  }
-  if (!entities_make()) {
-    mixer_destroy();
-    window_destroy();
-    return 1;
-  }
-  if (!scene_load_map(0)) {
-    mixer_destroy();
-    window_destroy();
-    return 1;
-  }
+  if (!window_make(WINDOW_W, WINDOW_H) ||
+      !mixer_make()                    ||
+      !renderer_make()                 ||
+      !entities_make()                 ||
+      !scene_load_map(0)) return 1;
   while (window_is_running()) {
     if (window_is_key_down(K_EXIT)) window_close();
     entities_update(window_get_delta_time());
@@ -47,7 +32,10 @@ main(void) {
     renderer_submit();
     arena_clear(tmp_arena);
   }
-  mixer_destroy();
-  window_destroy();
+  /* this is making the exit of the game slow so I'm turning it off
+   * we are quitting right away, so destroying stuff is pointless either way */
+  //mixer_destroy();
+  //window_destroy();
   return 0;
 }
+

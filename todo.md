@@ -1,3 +1,4 @@
+- [ ] Framerate fix (target framerate)
 - [x] Walls
 - [x] Boxes
 - [ ] Door

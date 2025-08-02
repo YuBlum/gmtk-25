@@ -49,3 +49,4 @@ size     = "struct v2"
 [component.flashable]
 flash_target = "float"
 flash        = "float"
+

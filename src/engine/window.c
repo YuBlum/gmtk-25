@@ -47,6 +47,7 @@ window_make(uint32_t width, uint32_t height) {
     return false;
   }
   glfwMakeContextCurrent(g_window.handle);
+  glfwSwapInterval(1);
   log_infolf("window created with %d %d dimensions", width, height);
   const GLFWvidmode *vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
   if (vidmode) {
@@ -63,10 +64,13 @@ window_make(uint32_t width, uint32_t height) {
   return true;
 }
 
+/* never using this so whatever */
+#if 0
 void
 window_destroy(void) {
   glfwTerminate();
 }
+#endif
 
 void
 window_close(void) {

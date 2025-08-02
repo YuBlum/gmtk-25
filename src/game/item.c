@@ -167,10 +167,13 @@ item_update(struct item_data *self, float dt) {
   for (int32_t i = (int32_t)self->amount - 1; i >= 0; i--) {
     self->timer_to_die[i] -= dt * TIMER_TO_DIE_SPEED;
     if (self->box_index[i] != -1) {
+      self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
       self->flash_target[i] = 0.0f;
       self->depth[i] = player->depth - 1.0f;
-      box->can_drop[self->box_index[i]] = true;
-      if (self->timer_to_die[i] < 0.0f) item_remove(self, i);
+      if (self->timer_to_die[i] < 0.0f) {
+        box->can_drop[self->box_index[i]] = true;
+        item_remove(self, i);
+      }
     }
   }
 }

@@ -38,13 +38,14 @@ box_update(struct box_data *self, float dt) {
         item_push(item, self->item_drop_type[target], self->position[target]);
         item->depth[player->item_held] = player->depth - 1.0f;
         self->item_drop_type[target] = ITEM_NONE;
+        self->can_drop[target] = false;
         g_block_btn = true;
       }
     } else {
       if (self->item_drop_type[target] != ITEM_NONE) {
         self->flash_target[target] = 0.0f;
       } else if (window_is_key_press(K_A)) {
-        item->launch_velocity[player->item_held] = v2_muls(v2_unit(v2_sub(self->position[target], item->position[player->item_held])), 0.4f);
+        item->position_target[player->item_held] = self->position[target];
         item->timer_to_die[player->item_held] = 1.0f;
         item->box_index[player->item_held] = target;
         self->item_drop_type[target] = item->type[player->item_held];

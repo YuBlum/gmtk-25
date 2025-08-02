@@ -82,6 +82,7 @@ player_update(struct player_data *self, float dt) {
         (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPSILON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
+
 }
 
 void
