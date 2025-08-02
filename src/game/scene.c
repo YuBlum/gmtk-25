@@ -35,14 +35,13 @@ scene_load(enum map map) {
   g_scene.next_map = g_scene.current_map;
   if (g_scene.layout == ROOM_UNLOCKED_LOCK) {
     global.going_out = true;
-  } else if (g_scene.layout == ROOM_END) {
-    if (!entities_layout_set(&layout)) return false;
-    return true;
   }
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
   uint32_t items_amount = global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
   uint32_t trash_amount = g_scene.layout == ROOM_TRASH || g_scene.layout == ROOM_CLEANED_TRASH ? TRASH_AMOUNT : 0;
-  layout.has_door = true;
+  if (map == MAP_DEFAULT_ROOM) {
+    layout.has_door = true;
+  }
   layout.solid_capacity = (g_scene.layout == ROOM_LOCK          ||
                            g_scene.layout == ROOM_BOX           ||
                            g_scene.layout == ROOM_ROPE          ||
@@ -110,8 +109,10 @@ scene_load(enum map map) {
     }
   }
   #if DEV
-  if (global.layout_box  == -1) log_errorlf("map '%u' has no layout boxes", map);
-  if (global.content_box == -1) log_errorlf("map '%u' has no content boxes", map);
+  if (map != MAP_OUTSIDE) {
+    if (global.layout_box  == -1) log_errorlf("map '%u' has no layout boxes", map);
+    if (global.content_box == -1) log_errorlf("map '%u' has no content boxes", map);
+  }
   #endif
   auto solid = entities_get_solid_data();
   solid->amount = solid->capacity;
@@ -249,14 +250,14 @@ scene_render(void) {
   auto map = &g_maps_data[g_scene.current_map];
   auto player = entities_get_player_data();
   renderer_request_tileset(MAP_TILES_AMOUNT, map->tileset, V2S(0.0f), map->tiles_sprite_position, map->tiles_position, 0);
+  renderer_request_sprite(SPR_DOOR_LOCKED, v2_sub(DOOR_POSITION, V2(0.0f, GAME_H)), DOOR_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
   if (g_scene.transition) {
     map = &g_maps_data[g_scene.next_map];
     renderer_request_tileset(MAP_TILES_AMOUNT, map->tileset, V2(0.0f, -GAME_H), map->tiles_sprite_position, map->tiles_position, 0);
   }
-  if (g_scene.transition) {
-    auto door = entities_get_door_data();
+  if (g_scene.transition && g_scene.next_map == MAP_DEFAULT_ROOM) {
     if (global.next_room_layout == ROOM_LOCK) {
-      renderer_request_sprite(SPR_DOOR_LOCKED, v2_add(door->position, V2(0.0f, GAME_H)), door->origin, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+      renderer_request_sprite(SPR_DOOR_LOCKED, v2_add(DOOR_POSITION, V2(0.0f, GAME_H)), DOOR_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
     } else {
       switch (global.next_room_layout) {
         case ROOM_BOX: {
@@ -280,8 +281,8 @@ scene_render(void) {
         default: {
         } break;
       }
-      renderer_request_sprite(SPR_DOOR, v2_add(door->position, V2(-1.0f, GAME_H)), door->origin, 0.0f, V2(+1.0f, 1.0f), WHITE, 1.0f, 0.1f, 0.0f);
-      renderer_request_sprite(SPR_DOOR, v2_add(door->position, V2(+1.0f, GAME_H)), door->origin, 0.0f, V2(-1.0f, 1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+      renderer_request_sprite(SPR_DOOR, v2_add(DOOR_POSITION, V2(-1.0f, GAME_H)), DOOR_ORIGIN, 0.0f, V2(+1.0f, 1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+      renderer_request_sprite(SPR_DOOR, v2_add(DOOR_POSITION, V2(+1.0f, GAME_H)), DOOR_ORIGIN, 0.0f, V2(-1.0f, 1.0f), WHITE, 1.0f, 0.1f, 0.0f);
     }
   } else switch (g_scene.layout) {
     case ROOM_ROPE: {

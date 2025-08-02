@@ -38,13 +38,16 @@ enum room_layout {
   ROOM_OPENED_BOX,
   ROOM_CLEANED_TRASH,
   ROOM_CUT_ROPE,
-  ROOM_UNLOCKED_LOCK,
-  ROOM_END
+  ROOM_UNLOCKED_LOCK
 };
 
 void item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip, bool spawn_transition, float spawn_transition_speed);
 void item_remove(struct item_data *self, uint32_t index);
 
 bool box_blocked_button(void);
+
+#define DOOR_SIZE     V2(4.0f, 2.0f)
+#define DOOR_ORIGIN   V2(0.0f, 0.5f)
+#define DOOR_POSITION V2(0.0f, GAME_H * 0.5f - DOOR_SIZE.y * 0.5f)
 
 #endif/*__GAME_CORE_H__*/

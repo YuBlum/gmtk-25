@@ -25,11 +25,11 @@ player_update(struct player_data *self, float dt) {
 #if DEV
   if (window_is_key_press(K_B)) {
     show_colliders = !show_colliders;
-    global.going_out = true;
   }
 #endif
-  if (scene_is_in_transition()) {
-   return;
+  if (scene_is_in_transition()) return;
+  if (global.end && !check_rect_rect(self->position, V2(2.0f, 1.0f), V2S(0.0f), V2(GAME_W, GAME_H))) {
+    return;
   }
   /* movement */
   struct v2 move_direction = v2_muls(v2_unit(V2(
@@ -76,7 +76,7 @@ player_update(struct player_data *self, float dt) {
         (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPSILON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
-  if (self->position.y - self->size.y * 0.5f > GAME_H * 0.5f) {
+  if (!global.end && self->position.y - self->size.y * 0.5f > GAME_H * 0.5f) {
     global.player_state.position      = V2(self->position.x, -GAME_H * 0.5f + 1.5f);
     global.player_state.scale         = self->scale;
     global.player_state.wiggle_cur    = self->wiggle_cur;
@@ -176,8 +176,12 @@ player_update(struct player_data *self, float dt) {
         global.next_room_layout = ROOM_DEFAULT;
         break;
     }
-    if (global.going_out && global.next_room_layout == ROOM_DEFAULT) global.next_room_layout = ROOM_END;
-    scene_transition_to(MAP_DEFAULT_ROOM);
+    if (global.going_out && global.next_room_layout == ROOM_DEFAULT) {
+      global.end = true;
+      scene_transition_to(MAP_OUTSIDE);
+    } else {
+      scene_transition_to(MAP_DEFAULT_ROOM);
+    }
   }
 }
 

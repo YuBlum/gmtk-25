@@ -3,6 +3,7 @@
 
 enum map {
   MAP_DEFAULT_ROOM = 0,
+  MAP_OUTSIDE,
   MAPS_AMOUNT
 };
 

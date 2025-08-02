@@ -4,7 +4,7 @@
   <export target="default_room.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../tilesets/room_tileset.tsj"/>
- <layer id="1" name="map" width="20" height="20">
+ <layer id="1" name="tiles" width="20" height="20">
   <data encoding="csv">
 1,14,14,14,14,14,14,15,4,3,4,3,13,14,14,14,14,14,14,2,
 1,18,18,18,18,18,18,19,4,3,4,3,17,18,18,18,18,18,18,2,

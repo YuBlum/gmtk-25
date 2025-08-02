@@ -8,8 +8,6 @@ field.wiggle_target = "float"
 field.item_held     = "int32_t"
 
 [entity.unique.door]
-component = [ "collidable" ]
-field.origin = "struct v2"
 field.locked = "bool"
 field.left   = "struct v2"
 field.right  = "struct v2"
