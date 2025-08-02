@@ -32,6 +32,7 @@ enum room_layout {
   ROOM_LOCK,
   ROOM_TRASH,
   ROOM_BOX,
+  ROOM_ROPE,
 };
 
 void item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip, bool spawn_transition, float spawn_transition_speed);

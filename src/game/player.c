@@ -138,11 +138,12 @@ player_update(struct player_data *self, float dt) {
       case ITEM_BOX: {
         global.next_room_layout = ROOM_BOX;
         global.next_item_type = ITEM_NONE;
-        log_warnl("room layout not implemented");
+        log_warnl("missing solution");
       } break;
       case ITEM_ROPE: {
-        global.next_room_layout = ROOM_DEFAULT;
-        log_warnl("room layout not implemented");
+        global.next_room_layout = ROOM_ROPE;
+        global.next_item_type = ITEM_KEY;
+        log_warnl("missing solution");
       } break;
       case ITEM_MIRROR: {
         global.next_room_layout = ROOM_DEFAULT;

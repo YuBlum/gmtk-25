@@ -17,6 +17,10 @@ field.right  = "struct v2"
 has_update = false
 field.position = "struct v2"
 
+[entity.unique.rope_room]
+has_update = false
+field.position = "struct v2"
+
 # the 'box' entity type has to come before the 'item' one 
 [entity.box]
 component = [ "renderable", "collidable", "flashable" ]

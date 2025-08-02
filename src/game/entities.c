@@ -6,6 +6,7 @@
 #include "game/player.h"
 #include "game/door.h"
 #include "game/box_room.h"
+#include "game/rope_room.h"
 
 struct entities {
   struct arena *arena;
@@ -15,6 +16,7 @@ struct entities {
   struct player_data *player_data;
   struct door_data *door_data;
   struct box_room_data *box_room_data;
+  struct rope_room_data *rope_room_data;
 };
 
 static struct entities g_entities;
@@ -217,6 +219,16 @@ entities_layout_set(const struct entities_layout *layout) {
   } else {
     g_entities.box_room_data = 0;
   }
+  if (layout->has_rope_room) {
+    g_entities.rope_room_data = arena_push_type(g_entities.arena, false, struct rope_room_data);
+    if (!g_entities.rope_room_data) {
+      log_errorl("couldn't allocate rope_room data");
+      return false;
+    }
+    rope_room_init(g_entities.rope_room_data);
+  } else {
+    g_entities.rope_room_data = 0;
+  }
   return true;
 }
 
@@ -248,6 +260,7 @@ entities_render(void) {
   if (g_entities.player_data) player_render(g_entities.player_data);
   if (g_entities.door_data) door_render(g_entities.door_data);
   if (g_entities.box_room_data) box_room_render(g_entities.box_room_data);
+  if (g_entities.rope_room_data) rope_room_render(g_entities.rope_room_data);
 }
 
 struct player_data *entities_get_player_data(void) {
@@ -260,6 +273,10 @@ struct door_data *entities_get_door_data(void) {
 
 struct box_room_data *entities_get_box_room_data(void) {
   return g_entities.box_room_data;
+}
+
+struct rope_room_data *entities_get_rope_room_data(void) {
+  return g_entities.rope_room_data;
 }
 
 struct box_data *entities_get_box_data(void) {

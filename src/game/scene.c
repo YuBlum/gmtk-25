@@ -23,6 +23,7 @@ scene_load(enum map map) {
   #endif
   bool is_door_locked = global.next_room_layout == ROOM_LOCK;
   bool is_box_room = global.next_room_layout == ROOM_BOX;
+  bool is_rope_room = global.next_room_layout == ROOM_ROPE;
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
   uint32_t items_amount = 0;
   if (global.next_room_layout == ROOM_TRASH) {
@@ -35,6 +36,9 @@ scene_load(enum map map) {
   layout.has_door = true;
   if (is_box_room) {
     layout.has_box_room = true;
+    layout.solid_capacity = 1;
+  } else if (is_rope_room) {
+    layout.has_rope_room = true;
     layout.solid_capacity = 1;
   }
   layout.item_capacity = items_amount + has_extra_item;
@@ -104,6 +108,11 @@ scene_load(enum map map) {
     auto box_room = entities_get_box_room_data();
     solid->position[solid->amount-1] = box_room->position;
     solid->size[solid->amount-1] = V2(2.0f, 1.25f);
+  }
+  if (is_rope_room) {
+    auto rope_room = entities_get_rope_room_data();
+    solid->position[solid->amount-1] = rope_room->position;
+    solid->size[solid->amount-1] = V2(18.0f, 0.5f);
   }
   return true;
 }

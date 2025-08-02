@@ -85,8 +85,8 @@ item_push(struct item_data *self, enum item_type type, struct v2 position, bool 
       self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_KEY: {
-      self->sprite[i] = SPR_ITEM_TEST;
-      self->size[i]   = V2S(0.5f);
+      self->sprite[i] = SPR_KEY;
+      self->size[i]   = V2S(0.75f);
     } break;
     case ITEM_AMOUNT:
       break;

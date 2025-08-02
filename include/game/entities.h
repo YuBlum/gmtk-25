@@ -4,6 +4,7 @@
 #include "game/player.h"
 #include "game/door.h"
 #include "game/box_room.h"
+#include "game/rope_room.h"
 #include "game/box.h"
 #include "game/item.h"
 #include "game/solid.h"
@@ -15,6 +16,7 @@ struct entities_layout {
   bool has_player;
   bool has_door;
   bool has_box_room;
+  bool has_rope_room;
 };
 
 bool entities_make(void);
@@ -25,6 +27,7 @@ void entities_render(void);
 struct player_data *entities_get_player_data(void);
 struct door_data *entities_get_door_data(void);
 struct box_room_data *entities_get_box_room_data(void);
+struct rope_room_data *entities_get_rope_room_data(void);
 struct box_data *entities_get_box_data(void);
 struct item_data *entities_get_item_data(void);
 struct solid_data *entities_get_solid_data(void);
