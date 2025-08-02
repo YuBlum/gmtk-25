@@ -9,6 +9,7 @@ struct global {
   struct v2 extra_item_position;
   enum item_type extra_item_type;
   enum item_type next_item_type;
+  enum room_layout next_room_layout;
   int32_t layout_box, content_box;
 };
 

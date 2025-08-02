@@ -6,7 +6,12 @@ struct global global;
 void
 global_init(void) {
   static_assert(
-    sizeof (struct global) == sizeof (struct player_data) + sizeof (enum item_type)*2 + sizeof (struct v2) + sizeof (int32_t)*2,
+    sizeof (struct global) ==
+      sizeof (struct player_data) +
+      sizeof (enum item_type)*2   +
+      sizeof (struct v2)          +
+      sizeof (int32_t)*2          +
+      sizeof (enum room_layout),
     "added global variable but didn't set it up"
   );
   global.player_state.sprite        = SPR_PLAYER;
@@ -24,6 +29,7 @@ global_init(void) {
   global.extra_item_type     = ITEM_NONE;
   global.extra_item_position = V2S(0.0f);
   global.next_item_type = ITEM_LOCK;
+  global.next_room_layout = ROOM_DEFAULT;
   global.layout_box  = -1;
   global.content_box = -1;
 }

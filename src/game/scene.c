@@ -1,4 +1,5 @@
 #include "engine/renderer.h"
+#include "engine/window.h"
 #include "game/maps_data.h"
 #include "game/entities.h"
 #include "game/global.h"
@@ -20,13 +21,14 @@ scene_load(enum map map) {
     return false;
   }
   #endif
+  bool is_door_locked = global.next_room_layout == ROOM_LOCK;
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
   uint32_t items_amount = global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
   struct entities_layout layout = { 0 };
   layout.has_player = true;
   layout.has_door = true;
   layout.item_capacity = items_amount + has_extra_item;
-  layout.solid_capacity = g_maps_data[map].solids_amount;
+  layout.solid_capacity = g_maps_data[map].solids_amount + is_door_locked;
   layout.box_capacity = g_maps_data[map].boxes_amount;
   g_scene.current_map = map;
   g_scene.next_map = g_scene.current_map;
@@ -74,6 +76,12 @@ scene_load(enum map map) {
     solid->position[i] = g_maps_data[map].solids_position[i];
     solid->size[i] = g_maps_data[map].solids_size[i];
   }
+  if (is_door_locked) {
+    auto door = entities_get_door_data();
+    door->locked = true;
+    solid->position[solid->amount-1] = door->position;
+    solid->size[solid->amount-1] = door->size;
+  }
   return true;
 }
 
@@ -96,7 +104,13 @@ scene_is_in_transition(void) {
 
 void
 scene_update(float dt) {
-  if (!g_scene.transition) return;
+  if (!g_scene.transition) {
+    if (window_is_key_press(K_RESTART)) {
+      global_init();
+      (void)scene_load(0);
+    }
+    return;
+  }
   auto player = entities_get_player_data();
   player->position.y = lerp(player->position.y, GAME_H * 0.5f + 1.5f, 8.0f * dt);
   g_scene.offset.y   = lerp(g_scene.offset.y, GAME_H, 8.0f * dt);

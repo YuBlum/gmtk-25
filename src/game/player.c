@@ -84,40 +84,86 @@ player_update(struct player_data *self, float dt) {
       global.extra_item_position = v2_sub(item->position[self->item_held], V2(0.0f, GAME_H));
     }
     auto box = entities_get_box_data();
-    switch (box->item_drop_type[global.content_box]) {
+    switch (box->item_drop_type[global.layout_box]) {
+      case ITEM_NONE:
+        global.next_room_layout = ROOM_DEFAULT;
+        switch (box->item_drop_type[global.content_box]) {
+          case ITEM_NONE:
+            global.next_item_type = ITEM_LOCK;
+            break;
+          case ITEM_LOCK: {
+            global.next_item_type = ITEM_TRASH;
+          } break;
+          case ITEM_TRASH: {
+            global.next_item_type = ITEM_BOX;
+          } break;
+          case ITEM_BOX: {
+            global.next_item_type = ITEM_ROPE;
+          } break;
+          case ITEM_ROPE: {
+            global.next_item_type = ITEM_MIRROR;
+          } break;
+          case ITEM_MIRROR: {
+            global.next_item_type = ITEM_NONE;
+          } break;
+          case ITEM_ROCK: {
+            global.next_item_type = ITEM_NONE;
+          } break;
+          case ITEM_GLASS: {
+            global.next_item_type = ITEM_NONE;
+          } break;
+          case ITEM_BROOM: {
+            global.next_item_type = ITEM_NONE;
+          } break;
+          case ITEM_KNIFE: {
+            global.next_item_type = ITEM_NONE;
+          } break;
+          case ITEM_KEY: {
+            global.next_item_type = ITEM_NONE;
+          } break;
+        }
+        break;
       case ITEM_LOCK: {
-        global.next_item_type = ITEM_TRASH;
+        global.next_room_layout = ROOM_LOCK;
+        global.next_item_type = ITEM_NONE;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_TRASH: {
-        global.next_item_type = ITEM_BOX;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_BOX: {
-        global.next_item_type = ITEM_ROPE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_ROPE: {
-        global.next_item_type = ITEM_MIRROR;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_MIRROR: {
-        global.next_item_type = ITEM_NONE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_ROCK: {
-        global.next_item_type = ITEM_NONE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_GLASS: {
-        global.next_item_type = ITEM_NONE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_BROOM: {
-        global.next_item_type = ITEM_NONE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_KNIFE: {
-        global.next_item_type = ITEM_NONE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
       case ITEM_KEY: {
-        global.next_item_type = ITEM_NONE;
+        global.next_room_layout = ROOM_DEFAULT;
+        log_warnl("room layout not implemented");
       } break;
-      case ITEM_NONE:
-        global.next_item_type = ITEM_LOCK;
-        break;
     }
     scene_transition_to(MAP_DEFAULT_ROOM);
   }

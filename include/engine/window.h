@@ -10,6 +10,7 @@ enum key : uint8_t {
   K_DOWN,
   K_A,
   K_B,
+  K_RESTART,
   K_EXIT,
   KEY_AMOUNT,
 };
