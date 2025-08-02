@@ -12,6 +12,7 @@ struct global {
   enum item_type next_item_type;
   enum room_layout next_room_layout;
   int32_t layout_box, content_box;
+  bool going_out;
 };
 
 extern struct global global;

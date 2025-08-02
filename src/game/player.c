@@ -126,9 +126,12 @@ player_update(struct player_data *self, float dt) {
         }
         break;
       case ITEM_LOCK: {
-        global.next_room_layout = ROOM_LOCK;
+        if (box->item_drop_type[global.content_box] == ITEM_KEY) {
+          global.next_room_layout = ROOM_UNLOCKED_LOCK;
+        } else {
+          global.next_room_layout = ROOM_LOCK;
+        }
         global.next_item_type = ITEM_NONE;
-        log_warnl("missing solution");
       } break;
       case ITEM_ROPE: {
         if (box->item_drop_type[global.content_box] == ITEM_KNIFE) {
@@ -170,6 +173,7 @@ player_update(struct player_data *self, float dt) {
         global.next_room_layout = ROOM_DEFAULT;
         break;
     }
+    if (global.going_out && global.next_room_layout == ROOM_DEFAULT) global.next_room_layout = ROOM_END;
     scene_transition_to(MAP_DEFAULT_ROOM);
   }
 }

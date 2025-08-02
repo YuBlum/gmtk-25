@@ -12,7 +12,8 @@ global_init(void) {
       sizeof (struct v2)          +
       sizeof (int32_t)*2          +
       sizeof (enum room_layout)   +
-      sizeof (enum sprite),
+      sizeof (enum sprite)        +
+      sizeof (bool) * 4, /* 3 of padding */
     "added global variable but didn't set it up"
   );
   global.player_state.sprite        = SPR_PLAYER;
@@ -34,4 +35,6 @@ global_init(void) {
   global.next_room_layout = ROOM_DEFAULT;
   global.layout_box  = -1;
   global.content_box = -1;
+  global.going_out = false;
 }
+
