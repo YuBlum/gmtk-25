@@ -1,7 +1,6 @@
 [entity.unique.player]
 component = [ "renderable", "collidable" ]
 exclude   = [ "color", "opacity", "flash" ]
-field.direction     = "struct v2"
 field.interact_pos  = "struct v2"
 field.interact_rad  = "float"
 field.wiggle_cur    = "float"

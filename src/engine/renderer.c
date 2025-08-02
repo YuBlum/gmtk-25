@@ -47,6 +47,7 @@ struct renderer {
   struct quad_indices indices_circle[QUAD_CAPACITY];
   uint32_t circles_amount;
 #endif
+  struct v2 offset;
   uint32_t quads_amount;
   uint32_t sh_default;
   int32_t  sh_default_proj;
@@ -217,8 +218,19 @@ renderer_make(void) {
   log_infol("vao, vbo and ibo created successfully");
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+  g_renderer.offset = V2S(0.0f);
   log_infol("renderer creation complete!");
   return true;
+}
+
+struct v2
+renderer_get_offset(void) {
+  return g_renderer.offset;
+}
+
+void
+renderer_set_offset(struct v2 offset) {
+  g_renderer.offset = offset;
 }
 
 static int
@@ -241,6 +253,12 @@ renderer_submit(void) {
     g_renderer.indices[i].i[3] = g_renderer.indices_to_sort[i].start + 2;
     g_renderer.indices[i].i[4] = g_renderer.indices_to_sort[i].start + 3;
     g_renderer.indices[i].i[5] = g_renderer.indices_to_sort[i].start + 0;
+  }
+  for (uint32_t i = 0; i < g_renderer.quads_amount; i++) {
+    g_renderer.vertices[i].v[0].position = v2_sub(g_renderer.vertices[i].v[0].position, g_renderer.offset);
+    g_renderer.vertices[i].v[1].position = v2_sub(g_renderer.vertices[i].v[1].position, g_renderer.offset);
+    g_renderer.vertices[i].v[2].position = v2_sub(g_renderer.vertices[i].v[2].position, g_renderer.offset);
+    g_renderer.vertices[i].v[3].position = v2_sub(g_renderer.vertices[i].v[3].position, g_renderer.offset);
   }
   glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -399,14 +417,14 @@ renderer_request_sprites(uint32_t amount, const enum sprite sprites[amount], con
 }
 
 void
-renderer_request_tileset(uint32_t amount, enum sprite tileset, const struct v2u tileset_offset[amount], const struct v2 positions[amount], const float depths[amount]) {
+renderer_request_tileset(uint32_t amount, enum sprite tileset, struct v2 offset, const struct v2u tileset_offset[amount], const struct v2 positions[amount], const float depths[amount]) {
 #if DEV
   if (g_renderer.quads_amount + amount >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much quads for rendering. increase QUAD_CAPACITY", __func__);
     return;
   }
 #endif
-  struct v2 hsiz, tpos, tsiz, cos_sin;
+  struct v2 hsiz, tpos, tsiz, cos_sin, pos;
   static_assert(sizeof (struct vertex) == sizeof (float) * 13);
 #if DEV
   if (tileset >= SPRITES_AMOUNT) {
@@ -428,10 +446,11 @@ renderer_request_tileset(uint32_t amount, enum sprite tileset, const struct v2u 
   }
 #endif
   for (uint32_t i = 0; i < amount; i++) {
-    g_renderer.vertices[g_renderer.quads_amount + i].v[0].position = positions[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[1].position = positions[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = positions[i];
-    g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = positions[i];
+    pos = v2_sub(positions[i], offset);
+    g_renderer.vertices[g_renderer.quads_amount + i].v[0].position = pos;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[1].position = pos;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[2].position = pos;
+    g_renderer.vertices[g_renderer.quads_amount + i].v[3].position = pos;
   }
   tsiz = V2(TILE_WIDTH * ATLAS_PIXEL_W, TILE_HEIGHT * ATLAS_PIXEL_H);
   for (uint32_t i = 0; i < amount; i++) {
@@ -582,14 +601,13 @@ renderer_request_sprite_slice(enum sprite sprite, struct v2u top_left, struct v2
   g_renderer.quads_amount++;
 }
 
+#if DEV
 void
 renderer_request_circle(struct v2 position, float radius, struct color color, float opacity) {
-#if DEV
   if (g_renderer.circles_amount + 1 >= QUAD_CAPACITY) {
     log_warnlf("%s: trying to request to much circles for rendering. increase QUAD_CAPACITY", __func__);
     return;
   }
-#endif
   static_assert(sizeof (struct vertex) == sizeof (float) * 13);
   struct vertex *vertices = g_renderer.vertices_circle[g_renderer.circles_amount].v;
   vertices[0].position = v2_add(position, V2(-radius, -radius));
@@ -616,7 +634,7 @@ renderer_request_rect(struct v2 position, struct v2 size, struct color color, fl
   renderer_request_sprite(
     SPR_PIXEL,
     position,
-    V2(0.0f, 0.0f),
+    V2S(0.0f),
     0.0f,
     v2_mul(size, V2(UNIT_PER_PIXEL, UNIT_PER_PIXEL)),
     color,
@@ -625,3 +643,4 @@ renderer_request_rect(struct v2 position, struct v2 size, struct color color, fl
     0.0f
   );
 }
+#endif

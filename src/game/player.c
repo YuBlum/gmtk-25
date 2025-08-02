@@ -1,7 +1,8 @@
 #include "game/entities.h"
 #include "engine/window.h"
 #include "engine/collision.h"
-#include "engine/maps.h"
+#include "engine/scenes.h"
+#include "game/global.h"
 
 #define SPEED 10.0f
 #define WIGGLE 1.0f
@@ -19,18 +20,7 @@ player_init(struct player_data *self) {
 #if DEV
   show_colliders = false;
 #endif
-  self->sprite           = SPR_PLAYER;
-  self->position         = V2(0.0f, 0.0f);
-  self->size             = V2(1.0f, 0.75f);
-  self->scale            = V2(1.0f, 1.0f);
-  self->origin           = V2(0.0f, 0.45f);
-  self->interact_pos     = v2_add(self->position, self->origin);
-  self->interact_rad     = 1.5f;
-  self->angle            = 0.0f;
-  self->wiggle_cur       = 0.0f;
-  self->wiggle_target    = 0.0f;
-  self->depth            = 0.0f;
-  self->item_held        = -1;
+  *self = global.player_state;
 }
 
 void
@@ -38,6 +28,7 @@ player_update(struct player_data *self, float dt) {
 #if DEV
   if (window_is_key_press(K_B)) show_colliders = !show_colliders;
 #endif
+  if (scene_is_in_transition()) return;
   /* movement */
   struct v2 move_direction = v2_muls(v2_unit(V2(
     window_is_key_down(K_RIGHT) - window_is_key_down(K_LEFT),
@@ -83,8 +74,13 @@ player_update(struct player_data *self, float dt) {
         (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPSILON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
-  if (self->position.y > GAME_H * 0.5f) {
-    log_infol("exit!");
+  if (self->position.y - self->size.y * 0.5f > GAME_H * 0.5f) {
+    global.player_state.position      = V2(self->position.x, self->position.y - GAME_H);
+    global.player_state.scale         = self->scale;
+    global.player_state.angle         = self->angle;
+    global.player_state.wiggle_cur    = self->wiggle_cur;
+    global.player_state.wiggle_target = self->wiggle_target;
+    scene_transition_to(MAP_DEFAULT_ROOM);
   }
 }
 

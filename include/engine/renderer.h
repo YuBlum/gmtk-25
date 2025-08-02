@@ -17,8 +17,11 @@ struct color { float r, g, b; };
 bool renderer_make(void);
 void renderer_submit(void);
 
+struct v2 renderer_get_offset(void);
+void renderer_set_offset(struct v2 offset);
+
 void renderer_request_sprites(uint32_t amount, const enum sprite sprites[amount], const struct v2 positions[amount], const struct v2 origins[amount], const float angles[amount], const struct v2 scales[amount], const struct color colors[amount], const float opacities[amount], const float depths[amount], const float flashes[amount]);
-void renderer_request_tileset(uint32_t amount, enum sprite tileset, const struct v2u tileset_offset[amount], const struct v2 positions[amount], const float depths[amount]);
+void renderer_request_tileset(uint32_t amount, enum sprite tileset, struct v2 offset, const struct v2u tileset_offset[amount], const struct v2 positions[amount], const float depths[amount]);
 
 void renderer_request_sprite(enum sprite sprite, struct v2 position, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth, float flash);
 void renderer_request_sprite_slice(enum sprite sprite, struct v2u top_left, struct v2u size, struct v2 position, struct v2 origin, float angle, struct v2 scale, struct color color, float opacity, float depth, float flash);

@@ -6,7 +6,7 @@
 #include "engine/renderer.h"
 #include "engine/scenes.h"
 #include "game/entities.h"
-#include "game/player.h"
+#include "game/global.h"
 
 #define WINDOW_W (GAME_W_PIXEL * GAME_S)
 #define WINDOW_H (GAME_H_PIXEL * GAME_S)
@@ -34,14 +34,17 @@ main(void) {
     window_destroy();
     return 1;
   }
-  if (!scene_load_map(0)) {
+  global_init();
+  if (!scene_load(0)) {
     mixer_destroy();
     window_destroy();
     return 1;
   }
   while (window_is_running()) {
+    float dt = window_get_delta_time();
     if (window_is_key_down(K_EXIT)) window_close();
-    entities_update(window_get_delta_time());
+    entities_update(dt);
+    scene_update(dt);
     entities_render();
     scene_render();
     renderer_submit();

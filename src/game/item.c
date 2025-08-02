@@ -23,7 +23,7 @@ item_push(struct item_data *self, enum item_type type, struct v2 position) {
   uint32_t i = self->amount++;
   self->flash[i]            = 0.0f;
   self->flash_target[i]     = 0.0f;
-  self->launch_velocity[i]  = V2(0.0f, 0.0f);
+  self->launch_velocity[i]  = V2S(0.0f);
   self->position[i]         = position;
   self->type[i]             = type;
   self->timer_to_die[i]     = 0.0f;
@@ -31,11 +31,11 @@ item_push(struct item_data *self, enum item_type type, struct v2 position) {
   switch (type) {
     case ITEM_TEST: {
       self->sprite[i] = SPR_ITEM_TEST;
-      self->size[i]   = V2(0.5f, 0.5f);
+      self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_TEST2: {
       self->sprite[i] = SPR_ITEM_TEST2;
-      self->size[i]   = V2(1.0f, 1.0f);
+      self->size[i]   = V2S(1.0f);
     } break;
     case ITEM_AMOUNT:
       break;
@@ -113,7 +113,7 @@ item_update(struct item_data *self, float dt) {
     for (uint32_t i = 0; i < self->amount; i++) {
       if (!check_rect_circle(self->position[i], self->size[i], player->interact_pos, player->interact_rad) || self->box_index[i] != -1) continue;
       self->depth[i] = player->depth - 1.0f;
-      self->launch_velocity[i] = V2(0.0f, 0.0f);
+      self->launch_velocity[i] = V2S(0.0f);
       player->item_held = i;
       break;
     }

@@ -101,6 +101,7 @@ mixer_make(void) {
 
 void
 mixer_destroy(void) {
+  log_warnlf("%s: mixer arena isn't destroyed here, don't call 'mixer_make' after this", __func__);
   mixer_clear_sounds();
   ma_mutex_uninit(&g_mixer.lock);
   ma_device_uninit(&g_mixer.device);
