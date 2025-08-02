@@ -73,16 +73,16 @@ item_push(struct item_data *self, enum item_type type, struct v2 position, bool 
       self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_GLASS: {
-      self->sprite[i] = SPR_ITEM_TEST;
+      self->sprite[i] = SPR_GLASS;
       self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_BROOM: {
-      self->sprite[i] = SPR_ITEM_TEST;
-      self->size[i]   = V2S(0.5f);
+      self->sprite[i] = SPR_BROOM;
+      self->size[i]   = V2S(1.0f);
     } break;
     case ITEM_KNIFE: {
-      self->sprite[i] = SPR_ITEM_TEST;
-      self->size[i]   = V2S(0.5f);
+      self->sprite[i] = SPR_KNIFE;
+      self->size[i]   = V2(0.5f, 0.75f);
     } break;
     case ITEM_KEY: {
       self->sprite[i] = SPR_KEY;

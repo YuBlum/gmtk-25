@@ -92,6 +92,9 @@ player_update(struct player_data *self, float dt) {
             global.next_item_type = ITEM_LOCK;
             break;
           case ITEM_LOCK: {
+            global.next_item_type = ITEM_ROPE;
+          } break;
+          case ITEM_ROPE: {
             global.next_item_type = ITEM_TRASH;
           } break;
           case ITEM_TRASH:
@@ -99,9 +102,6 @@ player_update(struct player_data *self, float dt) {
             global.next_item_type = ITEM_BOX;
           } break;
           case ITEM_BOX: {
-            global.next_item_type = ITEM_ROPE;
-          } break;
-          case ITEM_ROPE: {
             global.next_item_type = ITEM_MIRROR;
           } break;
           case ITEM_MIRROR: {
@@ -111,16 +111,16 @@ player_update(struct player_data *self, float dt) {
             global.next_item_type = ITEM_MIRROR;
           } break;
           case ITEM_GLASS: {
-            global.next_item_type = ITEM_NONE;
+            global.next_item_type = ITEM_BOX;
           } break;
           case ITEM_BROOM: {
-            global.next_item_type = ITEM_NONE;
+            global.next_item_type = ITEM_TRASH;
           } break;
           case ITEM_KNIFE: {
-            global.next_item_type = ITEM_NONE;
+            global.next_item_type = ITEM_ROPE;
           } break;
           case ITEM_KEY: {
-            global.next_item_type = ITEM_NONE;
+            global.next_item_type = ITEM_LOCK;
           } break;
         }
         break;
@@ -129,21 +129,36 @@ player_update(struct player_data *self, float dt) {
         global.next_item_type = ITEM_NONE;
         log_warnl("missing solution");
       } break;
-      case ITEM_TRASH:
-      case ITEM_RANDOM_TRASH: {
-        global.next_room_layout = ROOM_TRASH;
-        global.next_item_type = ITEM_NONE;
-        log_warnl("missing solution");
-      } break;
-      case ITEM_BOX: {
-        global.next_room_layout = ROOM_BOX;
-        global.next_item_type = ITEM_NONE;
-        log_warnl("missing solution");
-      } break;
       case ITEM_ROPE: {
         global.next_room_layout = ROOM_ROPE;
         global.next_item_type = ITEM_KEY;
         log_warnl("missing solution");
+      } break;
+      case ITEM_TRASH:
+      case ITEM_RANDOM_TRASH: {
+        switch (box->item_drop_type[global.content_box]) {
+          case ITEM_BROOM: {
+            global.next_room_layout = ROOM_CLEANED_TRASH;
+            global.next_item_type = ITEM_KNIFE;
+          } break;
+          default: {
+            global.next_room_layout = ROOM_TRASH;
+            global.next_item_type = ITEM_NONE;
+          } break;
+        }
+      } break;
+      case ITEM_BOX: {
+        switch (box->item_drop_type[global.content_box]) {
+          case ITEM_GLASS:
+          case ITEM_KNIFE: {
+            global.next_room_layout = ROOM_OPENED_BOX;
+            global.next_item_type = ITEM_BROOM;
+          } break;
+          default: {
+            global.next_room_layout = ROOM_BOX;
+            global.next_item_type = ITEM_NONE;
+          } break;
+        }
       } break;
       case ITEM_MIRROR: {
         switch (box->item_drop_type[global.content_box]) {
@@ -156,7 +171,6 @@ player_update(struct player_data *self, float dt) {
             global.next_item_type = ITEM_NONE;
             break;
         }
-        log_warnl("missing solution");
       } break;
       default:
         global.next_room_layout = ROOM_DEFAULT;

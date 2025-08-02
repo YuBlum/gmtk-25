@@ -15,6 +15,8 @@ struct scene {
 #define ROPE_Y -2.0f
 #define BOX_Y 1.0f
 #define MIRROR_Y 1.0f
+#define BOX_ORIGIN V2(-0.25f, 0.5f)
+#define TRASH_AMOUNT 1000
 
 static struct scene g_scene;
 
@@ -29,8 +31,8 @@ scene_load(enum map map) {
   struct entities_layout layout = { 0 };
   g_scene.layout = global.next_room_layout;
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
-  uint32_t items_amount = 0;
-  items_amount = g_scene.layout == ROOM_TRASH ? 1000 : global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
+  uint32_t items_amount = global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
+  uint32_t trash_amount = g_scene.layout == ROOM_TRASH || g_scene.layout == ROOM_CLEANED_TRASH ? TRASH_AMOUNT : 0;
   layout.has_player = true;
   layout.has_door = true;
   layout.solid_capacity = (g_scene.layout == ROOM_LOCK   ||
@@ -38,21 +40,36 @@ scene_load(enum map map) {
                            g_scene.layout == ROOM_ROPE   ||
                            g_scene.layout == ROOM_MIRROR ||
                            g_scene.layout == ROOM_BROKEN_MIRROR) + g_maps_data[map].solids_amount;
-  layout.item_capacity = items_amount + has_extra_item;
+  layout.item_capacity = items_amount + trash_amount + has_extra_item;
   layout.box_capacity = g_maps_data[map].boxes_amount;
   g_scene.current_map = map;
   g_scene.next_map = g_scene.current_map;
   if (!entities_layout_set(&layout)) return false;
   auto item = entities_get_item_data();
-  if (global.next_room_layout == ROOM_TRASH) {
+  for (uint32_t i = 0; i < items_amount; i++) {
+    item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false, true, 0.0f);
+  }
+  if (g_scene.layout == ROOM_TRASH) {
     struct v2 item_pos;
-    for (uint32_t i = 0; i < items_amount; i++) {
+    for (uint32_t i = 0; i < TRASH_AMOUNT; i++) {
       item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(-8.0f, +4.5f));
       item_push(item, ITEM_RANDOM_TRASH, item_pos, false, true, randf_from_to(4.0f, 8.0f));
     }
-  } else {
-    for (uint32_t i = 0; i < items_amount; i++) {
-      item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false, true, 0.0f);
+  } else if (g_scene.layout == ROOM_CLEANED_TRASH) {
+    struct v2 item_pos;
+    float chose_direction;
+    for (uint32_t i = 0; i < TRASH_AMOUNT; i++) {
+      chose_direction = randf();
+      if        (chose_direction < 0.25f) {
+        item_pos = V2(randf_from_to(-8.0f, -3.0f), randf_from_to(-8.0f, +4.5f));
+      } else if (chose_direction < 0.50f) {
+        item_pos = V2(randf_from_to(+3.0f, +8.0f), randf_from_to(-8.0f, +4.5f));
+      } else if (chose_direction < 0.75f) {
+        item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(-8.0f, -3.0f));
+      } else {
+        item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(+3.0f, +4.5f));
+      }
+      item_push(item, ITEM_RANDOM_TRASH, item_pos, false, true, randf_from_to(4.0f, 8.0f));
     }
   }
   if (has_extra_item) {
@@ -101,9 +118,10 @@ scene_load(enum map map) {
       solid->position[solid->amount-1] = door->position;
       solid->size[solid->amount-1] = door->size;
     } break;
-    case ROOM_BOX: {
+    case ROOM_BOX:
+    case ROOM_OPENED_BOX: {
       solid->position[solid->amount-1] = V2(0.0f, BOX_Y);
-      solid->size[solid->amount-1] = V2(2.0f, 0.5f);
+      solid->size[solid->amount-1] = V2(1.75f, 0.5f);
     } break;
     case ROOM_ROPE: {
       solid->position[solid->amount-1] = V2(0.0f, ROPE_Y);
@@ -219,7 +237,10 @@ scene_render(void) {
     } else {
       switch (global.next_room_layout) {
         case ROOM_BOX: {
-          renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y + GAME_H), V2(0.0f, 0.5f), 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+          renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y + GAME_H), BOX_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
+        } break;
+        case ROOM_OPENED_BOX: {
+          renderer_request_sprite(SPR_OPENED_BOX, V2(0.0f, BOX_Y + GAME_H), BOX_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f, 0.1f, 0.0f);
         } break;
         case ROOM_ROPE: {
           rope_render(ROPE_Y + GAME_H);
@@ -241,7 +262,11 @@ scene_render(void) {
       rope_render(ROPE_Y);
     } break;
     case ROOM_BOX: {
-      renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y), V2(0.0f, 0.5f), 0.0f, V2S(1.0f), WHITE, 1.0f,
+      renderer_request_sprite(SPR_BOX_TAPED, V2(0.0f, BOX_Y), BOX_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f,
+                              player->position.y > BOX_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
+    } break;
+    case ROOM_OPENED_BOX: {
+      renderer_request_sprite(SPR_OPENED_BOX, V2(0.0f, BOX_Y), BOX_ORIGIN, 0.0f, V2S(1.0f), WHITE, 1.0f,
                               player->position.y > BOX_Y ? player->depth-10.0f : player->depth+0.1f, 0.0f);
     } break;
     case ROOM_MIRROR: {
