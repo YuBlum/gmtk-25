@@ -99,15 +99,12 @@ mixer_make(void) {
   return true;
 }
 
-/* never using this so whatever */
-#if 0
 void
 mixer_destroy(void) {
   mixer_clear_sounds();
   ma_mutex_uninit(&g_mixer.lock);
   ma_device_uninit(&g_mixer.device);
 }
-#endif
 
 struct sound_result
 mixer_sound_reserve(const char *sound_file_path, bool active_on_start, bool loop) {

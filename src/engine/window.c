@@ -64,13 +64,10 @@ window_make(uint32_t width, uint32_t height) {
   return true;
 }
 
-/* never using this so whatever */
-#if 0
 void
 window_destroy(void) {
   glfwTerminate();
 }
-#endif
 
 void
 window_close(void) {

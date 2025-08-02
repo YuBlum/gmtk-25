@@ -1,6 +1,7 @@
 #include "game/entities.h"
 #include "engine/window.h"
 #include "engine/collision.h"
+#include "engine/maps.h"
 
 #define SPEED 10.0f
 #define WIGGLE 1.0f
@@ -82,7 +83,9 @@ player_update(struct player_data *self, float dt) {
         (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPSILON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
-
+  if (self->position.y > GAME_H * 0.5f) {
+    log_infol("exit!");
+  }
 }
 
 void

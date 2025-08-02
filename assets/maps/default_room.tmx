@@ -4,7 +4,7 @@
   <export target="default_room.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../tilesets/room_tileset.tsj"/>
- <layer id="1" name="map" width="20" height="20">
+ <layer id="1" name="map" width="20" height="20" locked="1">
   <data encoding="csv">
 1,14,14,14,14,14,14,15,4,4,3,3,13,14,14,14,14,14,14,2,
 1,18,18,18,18,18,18,19,4,4,3,3,17,18,18,18,18,18,18,2,
@@ -41,7 +41,7 @@
   <object id="17" x="52" y="52" width="24" height="24"/>
   <object id="18" x="244" y="52" width="24" height="24"/>
  </objectgroup>
- <objectgroup id="3" name="items">
+ <objectgroup id="3" name="items" locked="1">
   <properties>
    <property name="type" value="enum item_type"/>
   </properties>
