@@ -7,6 +7,7 @@
 #include "game/door.h"
 #include "game/box_room.h"
 #include "game/rope_room.h"
+#include "game/mirror_room.h"
 
 struct entities {
   struct arena *arena;
@@ -17,6 +18,7 @@ struct entities {
   struct door_data *door_data;
   struct box_room_data *box_room_data;
   struct rope_room_data *rope_room_data;
+  struct mirror_room_data *mirror_room_data;
 };
 
 static struct entities g_entities;
@@ -229,6 +231,16 @@ entities_layout_set(const struct entities_layout *layout) {
   } else {
     g_entities.rope_room_data = 0;
   }
+  if (layout->has_mirror_room) {
+    g_entities.mirror_room_data = arena_push_type(g_entities.arena, false, struct mirror_room_data);
+    if (!g_entities.mirror_room_data) {
+      log_errorl("couldn't allocate mirror_room data");
+      return false;
+    }
+    mirror_room_init(g_entities.mirror_room_data);
+  } else {
+    g_entities.mirror_room_data = 0;
+  }
   return true;
 }
 
@@ -261,6 +273,7 @@ entities_render(void) {
   if (g_entities.door_data) door_render(g_entities.door_data);
   if (g_entities.box_room_data) box_room_render(g_entities.box_room_data);
   if (g_entities.rope_room_data) rope_room_render(g_entities.rope_room_data);
+  if (g_entities.mirror_room_data) mirror_room_render(g_entities.mirror_room_data);
 }
 
 struct player_data *entities_get_player_data(void) {
@@ -277,6 +290,10 @@ struct box_room_data *entities_get_box_room_data(void) {
 
 struct rope_room_data *entities_get_rope_room_data(void) {
   return g_entities.rope_room_data;
+}
+
+struct mirror_room_data *entities_get_mirror_room_data(void) {
+  return g_entities.mirror_room_data;
 }
 
 struct box_data *entities_get_box_data(void) {

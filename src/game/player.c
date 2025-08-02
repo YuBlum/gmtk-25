@@ -146,7 +146,8 @@ player_update(struct player_data *self, float dt) {
         log_warnl("missing solution");
       } break;
       case ITEM_MIRROR: {
-        global.next_room_layout = ROOM_DEFAULT;
+        global.next_room_layout = ROOM_MIRROR;
+        global.next_item_type = ITEM_NONE;
         log_warnl("room layout not implemented");
       } break;
       case ITEM_ROCK: {
