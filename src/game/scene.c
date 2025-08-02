@@ -22,6 +22,7 @@ scene_load(enum map map) {
   }
   #endif
   bool is_door_locked = global.next_room_layout == ROOM_LOCK;
+  bool is_box_room = global.next_room_layout == ROOM_BOX;
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
   uint32_t items_amount = 0;
   if (global.next_room_layout == ROOM_TRASH) {
@@ -32,6 +33,10 @@ scene_load(enum map map) {
   struct entities_layout layout = { 0 };
   layout.has_player = true;
   layout.has_door = true;
+  if (is_box_room) {
+    layout.has_box_room = true;
+    layout.solid_capacity = 1;
+  }
   layout.item_capacity = items_amount + has_extra_item;
   layout.solid_capacity = g_maps_data[map].solids_amount + is_door_locked;
   layout.box_capacity = g_maps_data[map].boxes_amount;
@@ -42,18 +47,18 @@ scene_load(enum map map) {
   if (global.next_room_layout == ROOM_TRASH) {
     struct v2 item_pos;
     for (uint32_t i = 0; i < items_amount; i++) {
-      item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(-8.0f, +5.0f));
-      item_push(item, ITEM_RANDOM_TRASH, item_pos, false);
+      item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(-8.0f, +4.5f));
+      item_push(item, ITEM_RANDOM_TRASH, item_pos, false, true, randf_from_to(4.0f, 8.0f));
     }
   } else {
     for (uint32_t i = 0; i < items_amount; i++) {
-      item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false);
+      item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false, true, 0.0f);
     }
   }
   if (has_extra_item) {
     auto player = entities_get_player_data();
     player->item_held = item->amount;
-    item_push(item, global.extra_item_type, global.extra_item_position, player->scale.x < 0.0f);
+    item_push(item, global.extra_item_type, global.extra_item_position, player->scale.x < 0.0f, false, 0.0f);
     item->position_target[player->item_held] = player->position;
     item->depth[player->item_held] = player->depth - 1.0f;
     global.extra_item_type = ITEM_NONE;
@@ -94,6 +99,11 @@ scene_load(enum map map) {
     door->locked = true;
     solid->position[solid->amount-1] = door->position;
     solid->size[solid->amount-1] = door->size;
+  }
+  if (is_box_room) {
+    auto box_room = entities_get_box_room_data();
+    solid->position[solid->amount-1] = box_room->position;
+    solid->size[solid->amount-1] = V2(2.0f, 1.25f);
   }
   return true;
 }

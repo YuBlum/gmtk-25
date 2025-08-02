@@ -5,6 +5,7 @@
 #include "game/solid.h"
 #include "game/player.h"
 #include "game/door.h"
+#include "game/box_room.h"
 
 struct entities {
   struct arena *arena;
@@ -13,6 +14,7 @@ struct entities {
   struct solid_data solid_data;
   struct player_data *player_data;
   struct door_data *door_data;
+  struct box_room_data *box_room_data;
 };
 
 static struct entities g_entities;
@@ -106,6 +108,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate item angle data");
       return false;
     }
+    g_entities.item_data.opacity = arena_push_array(g_entities.arena, false, float, layout->item_capacity);
+    if (!g_entities.item_data.opacity) {
+      log_errorl("couldn't allocate item opacity data");
+      return false;
+    }
     g_entities.item_data.depth = arena_push_array(g_entities.arena, false, float, layout->item_capacity);
     if (!g_entities.item_data.depth) {
       log_errorl("couldn't allocate item depth data");
@@ -156,6 +163,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate item box_index data");
       return false;
     }
+    g_entities.item_data.spawn_timer = arena_push_array(g_entities.arena, false, float, layout->item_capacity);
+    if (!g_entities.item_data.spawn_timer) {
+      log_errorl("couldn't allocate item spawn_timer data");
+      return false;
+    }
   } else {
     g_entities.item_data.capacity = 0;
   }
@@ -195,6 +207,16 @@ entities_layout_set(const struct entities_layout *layout) {
   } else {
     g_entities.door_data = 0;
   }
+  if (layout->has_box_room) {
+    g_entities.box_room_data = arena_push_type(g_entities.arena, false, struct box_room_data);
+    if (!g_entities.box_room_data) {
+      log_errorl("couldn't allocate box_room data");
+      return false;
+    }
+    box_room_init(g_entities.box_room_data);
+  } else {
+    g_entities.box_room_data = 0;
+  }
   return true;
 }
 
@@ -225,6 +247,7 @@ entities_render(void) {
   if (g_entities.solid_data.capacity) solid_render(&g_entities.solid_data);
   if (g_entities.player_data) player_render(g_entities.player_data);
   if (g_entities.door_data) door_render(g_entities.door_data);
+  if (g_entities.box_room_data) box_room_render(g_entities.box_room_data);
 }
 
 struct player_data *entities_get_player_data(void) {
@@ -233,6 +256,10 @@ struct player_data *entities_get_player_data(void) {
 
 struct door_data *entities_get_door_data(void) {
   return g_entities.door_data;
+}
+
+struct box_room_data *entities_get_box_room_data(void) {
+  return g_entities.box_room_data;
 }
 
 struct box_data *entities_get_box_data(void) {

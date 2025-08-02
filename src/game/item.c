@@ -12,7 +12,7 @@
 #define TIMER_TO_DIE_SPEED 4.0f
 
 void
-item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip) {
+item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip, bool spawn_transition, float spawn_transition_speed) {
   if (self->amount >= self->capacity) {
     log_warnlf("%s: items capacity is already full", __func__);
     return;
@@ -31,6 +31,8 @@ item_push(struct item_data *self, enum item_type type, struct v2 position, bool 
   self->box_index[i]        = -1;
   self->scale[i]            = V2(flip ? -1.0f : 1.0f, 1.0f);
   self->angle[i]            = 0.0f;
+  self->opacity[i]          = spawn_transition ? 0.0f : 1.0f;
+  self->spawn_timer[i]      = spawn_transition_speed == 0.0f ? 10.0f : spawn_transition_speed;
   switch (type) {
     case ITEM_LOCK: {
       self->sprite[i] = SPR_LOCK;
@@ -97,7 +99,7 @@ item_remove(struct item_data *self, uint32_t index) {
     log_warnlf("%s: index '%u' bigger than the items amount", __func__, index);
     return;
   }
-  static_assert(sizeof (struct item_data) == sizeof (void *) * 14 + 8, "update the item removal, missing fields or a field was removed");
+  static_assert(sizeof (struct item_data) == sizeof (void *) * 16 + 8, "update the item removal, missing fields or a field was removed");
   uint32_t i, max = --self->amount;
   for (i = index; i < max; i++) self->position[i]        = self->position[i + 1];
   for (i = index; i < max; i++) self->sprite[i]          = self->sprite[i + 1];
@@ -113,12 +115,22 @@ item_remove(struct item_data *self, uint32_t index) {
   for (i = index; i < max; i++) self->box_index[i]       = self->box_index[i + 1];
   for (i = index; i < max; i++) self->scale[i]           = self->scale[i + 1];
   for (i = index; i < max; i++) self->angle[i]           = self->angle[i + 1];
+  for (i = index; i < max; i++) self->opacity[i]         = self->opacity[i + 1];
+  for (i = index; i < max; i++) self->spawn_timer[i]     = self->spawn_timer[i + 1];
 }
 
 void
 item_update(struct item_data *self, float dt) {
   if (scene_is_in_transition()) return;
   if (!self->amount) return;
+  for (int32_t i = (int32_t)self->amount - 1; i >= 0; i--) {
+    self->opacity[i] = lerp(self->opacity[i], 1.0f, self->spawn_timer[i] * dt);
+    if (self->opacity[i] >= 0.99f) {
+      self->opacity[i] = 1.0f;
+    } else {
+      self->flash_target[i] = 0.0f;
+    }
+  }
   bool interacting = window_is_key_press(K_A) && !box_blocked_button();
   auto player = entities_get_player_data();
   if (player->item_held >= 0) {
@@ -127,7 +139,7 @@ item_update(struct item_data *self, float dt) {
     self->position_target[i] = V2(player->position.x - player->size.x * 0.5f * self->scale[i].x, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 14 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 16 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity', 'next_position', 'position_target' and 'depth' fields don't need to be added to the swapping */
@@ -141,6 +153,8 @@ item_update(struct item_data *self, float dt) {
     auto box_index        = self->box_index[i];
     auto scale            = self->scale[i];
     auto angle            = self->angle[i];
+    auto opacity          = self->opacity[i];
+    auto spawn_timer      = self->spawn_timer[i];
     item_remove(self, i);
     self->amount++;
     self->type[self->amount - 1]             = type;
@@ -154,6 +168,8 @@ item_update(struct item_data *self, float dt) {
     self->position_target[self->amount - 1]  = position;
     self->scale[self->amount - 1]            = scale;
     self->angle[self->amount - 1]            = angle;
+    self->opacity[self->amount - 1]          = opacity;
+    self->spawn_timer[self->amount - 1]      = spawn_timer;
     float launch_angle;
     if (player->scale.x < 0.0f) {
       launch_angle = randf() < 0.5f ? randf() * (PI/3.0f) + 5.0f*PI/3.0f : randf() * (PI/3.0f); // between 60 and 300 degrees (forward arc)
@@ -167,7 +183,8 @@ item_update(struct item_data *self, float dt) {
   }
   if (interacting) {
     for (uint32_t i = 0; i < self->amount; i++) {
-      if (!check_rect_circle(self->position[i], self->size[i], player->interact_pos, player->interact_rad) || self->box_index[i] != -1) continue;
+      if (!check_rect_circle(self->position[i], self->size[i], player->interact_pos, player->interact_rad) ||
+          self->box_index[i] != -1 || self->opacity[i] < 1.0f) continue;
       self->depth[i] = player->depth - 1.0f;
       self->launch_velocity[i] = V2S(0.0f);
       player->item_held = i;
@@ -248,7 +265,8 @@ item_render(struct item_data *self) {
     0,
     self->angle,
     self->scale,
-    0, 0,
+    0,
+    self->opacity,
     self->depth,
     self->flash
   );

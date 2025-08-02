@@ -31,9 +31,10 @@ enum room_layout {
   ROOM_DEFAULT = 0,
   ROOM_LOCK,
   ROOM_TRASH,
+  ROOM_BOX,
 };
 
-void item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip);
+void item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip, bool spawn_transition, float spawn_transition_speed);
 void item_remove(struct item_data *self, uint32_t index);
 
 bool box_blocked_button(void);

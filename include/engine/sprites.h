@@ -20,6 +20,7 @@ enum sprite {
   SPR_ROCK,
   SPR_MIRROR,
   SPR_RANDOM_TRASH1,
+  SPR_BOX_TAPED,
   SPRITES_AMOUNT
 };
 

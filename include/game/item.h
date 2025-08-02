@@ -10,6 +10,7 @@ struct item_data {
   struct v2 *scale;
   enum sprite *sprite;
   float *angle;
+  float *opacity;
   float *depth;
   float *flash;
   struct v2 *size;
@@ -20,6 +21,7 @@ struct item_data {
   enum item_type *type;
   float *timer_to_die;
   int32_t *box_index;
+  float *spawn_timer;
   uint32_t capacity;
   uint32_t amount;
 };
