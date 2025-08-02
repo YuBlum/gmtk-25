@@ -1,5 +1,5 @@
-#include "engine/maps_data.h"
 #include "engine/renderer.h"
+#include "game/maps_data.h"
 #include "game/entities.h"
 #include "game/global.h"
 
@@ -24,6 +24,7 @@ scene_load(enum map map) {
   uint32_t items_amount = global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
   struct entities_layout layout = { 0 };
   layout.has_player = true;
+  layout.has_door = true;
   layout.item_capacity = items_amount + has_extra_item;
   layout.solid_capacity = g_maps_data[map].solids_amount;
   layout.box_capacity = g_maps_data[map].boxes_amount;
@@ -32,12 +33,12 @@ scene_load(enum map map) {
   if (!entities_layout_set(&layout)) return false;
   auto item = entities_get_item_data();
   for (uint32_t i = 0; i < items_amount; i++) {
-    item_push(item, global.next_item_type, g_maps_data[map].items_position[i]);
+    item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false);
   }
   if (has_extra_item) {
     auto player = entities_get_player_data();
     player->item_held = item->amount;
-    item_push(item, global.extra_item_type, global.extra_item_position);
+    item_push(item, global.extra_item_type, global.extra_item_position, player->scale.x < 0.0f);
     item->position_target[player->item_held] = player->position;
     item->depth[player->item_held] = player->depth - 1.0f;
     global.extra_item_type = ITEM_NONE;
@@ -69,7 +70,7 @@ scene_load(enum map map) {
   #endif
   auto solid = entities_get_solid_data();
   solid->amount = solid->capacity;
-  for (uint32_t i = 0; i < solid->amount; i++) {
+  for (uint32_t i = 0; i < g_maps_data[map].solids_amount; i++) {
     solid->position[i] = g_maps_data[map].solids_position[i];
     solid->size[i] = g_maps_data[map].solids_size[i];
   }
@@ -95,16 +96,16 @@ scene_is_in_transition(void) {
 
 void
 scene_update(float dt) {
-  (void)dt;
-  if (g_scene.transition) {
-    g_scene.offset.y = lerp(g_scene.offset.y, GAME_H, 8.0f * dt);
-    if (g_scene.offset.y >= GAME_H - 0.05f) {
-      g_scene.offset.y = 0.0f;
-      (void)scene_load(g_scene.next_map);
-      g_scene.transition = false;
-    }
-    renderer_set_offset(g_scene.offset);
+  if (!g_scene.transition) return;
+  auto player = entities_get_player_data();
+  player->position.y = lerp(player->position.y, GAME_H * 0.5f + 1.5f, 8.0f * dt);
+  g_scene.offset.y   = lerp(g_scene.offset.y, GAME_H, 8.0f * dt);
+  if (g_scene.offset.y >= GAME_H - 0.05f) {
+    g_scene.offset.y = 0.0f;
+    (void)scene_load(g_scene.next_map);
+    g_scene.transition = false;
   }
+  renderer_set_offset(g_scene.offset);
 }
 
 void

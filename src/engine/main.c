@@ -4,7 +4,7 @@
 #include "engine/window.h"
 #include "engine/mixer.h"
 #include "engine/renderer.h"
-#include "engine/scenes.h"
+#include "game/scene.h"
 #include "game/entities.h"
 #include "game/global.h"
 

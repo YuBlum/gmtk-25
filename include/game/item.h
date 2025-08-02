@@ -7,6 +7,7 @@
 
 struct item_data {
   struct v2 *position;
+  struct v2 *scale;
   enum sprite *sprite;
   float *depth;
   float *flash;

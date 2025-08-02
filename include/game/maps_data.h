@@ -2,29 +2,27 @@
 #define __MAPS_DATA_H__
 
 #include "engine/math.h"
-#include "engine/maps.h"
+#include "game/maps.h"
 #include "engine/sprites.h"
 #include "game/core.h"
 #include "engine/core.h"
 
-static const struct v2 g_map_default_room_solids_position[8] = {
+static const struct v2 g_map_default_room_solids_position[7] = {
   { 8.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
   { 312.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (160.0/UNIT_PER_PIXEL) },
   { 72.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (16.0/UNIT_PER_PIXEL) },
-  { 72.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
+  { 160.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
   { 248.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (16.0/UNIT_PER_PIXEL) },
-  { 248.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
   { 64.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
   { 256.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
 };
 
-static const struct v2 g_map_default_room_solids_size[8] = {
+static const struct v2 g_map_default_room_solids_size[7] = {
   { 16.0/UNIT_PER_PIXEL, 320.0/UNIT_PER_PIXEL },
   { 16.0/UNIT_PER_PIXEL, 320.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 32.0/UNIT_PER_PIXEL },
-  { 112.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
+  { 288.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 32.0/UNIT_PER_PIXEL },
-  { 112.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
   { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
   { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
 };
@@ -847,12 +845,12 @@ static const struct {
       { 0, 32 },
       { 0, 32 },
       { 0, 32 },
-      { 16, 32 },
+      { 0, 32 },
       { 48, 0 },
       { 48, 0 },
       { 32, 0 },
       { 32, 0 },
-      { 32, 32 },
+      { 0, 32 },
       { 0, 32 },
       { 0, 32 },
       { 0, 32 },
@@ -863,7 +861,7 @@ static const struct {
     },
     .solids_position = g_map_default_room_solids_position,
     .solids_size     = g_map_default_room_solids_size,
-    .solids_amount   = 8,
+    .solids_amount   = 7,
     .items_position = g_map_default_room_items_position,
     .items_amount   = 1,
     .boxes_position = g_map_default_room_boxes_position,

@@ -174,7 +174,7 @@ maps_h += "#endif/*__MAPS_H__*/\n"
 maps_data_h  = "#ifndef __MAPS_DATA_H__\n"
 maps_data_h += "#define __MAPS_DATA_H__\n\n"
 maps_data_h += "#include \"engine/math.h\"\n"
-maps_data_h += "#include \"engine/maps.h\"\n"
+maps_data_h += "#include \"game/maps.h\"\n"
 maps_data_h += "#include \"engine/sprites.h\"\n"
 maps_data_h += "#include \"game/core.h\"\n"
 maps_data_h += "#include \"engine/core.h\"\n\n"
@@ -255,7 +255,7 @@ for m in maps:
 maps_data_h += "};\n\n"
 maps_data_h += "#endif/*__MAPS_DATA_H__*/\n"
 
-path = "./include/engine/maps_data.h"
+path = "./include/game/maps_data.h"
 try:
     with open(path, "w") as f:
         f.write(maps_data_h)
@@ -264,7 +264,7 @@ except:
     print("couldn't open '", path, "'", sep="");
     exit(1)
 
-path = "./include/engine/maps.h"
+path = "./include/game/maps.h"
 try:
     with open(path, "w") as f:
         f.write(maps_h)

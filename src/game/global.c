@@ -23,7 +23,7 @@ global_init(void) {
   global.player_state.item_held     = -1;
   global.extra_item_type     = ITEM_NONE;
   global.extra_item_position = V2S(0.0f);
-  global.next_item_type = ITEM_TEST;
+  global.next_item_type = ITEM_LOCK;
   global.layout_box  = -1;
   global.content_box = -1;
 }

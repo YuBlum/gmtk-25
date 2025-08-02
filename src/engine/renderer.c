@@ -9,7 +9,7 @@
 #include "engine/shaders.h"
 #include "engine/renderer.h"
 #include "engine/atlas.h"
-#include "engine/maps.h"
+#include "game/maps.h"
 
 struct vertex {
   struct v2    position;

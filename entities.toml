@@ -7,6 +7,11 @@ field.wiggle_cur    = "float"
 field.wiggle_target = "float"
 field.item_held     = "int32_t"
 
+[entity.unique.door]
+component = [ "collidable" ]
+field.left  = "struct v2"
+field.right = "struct v2"
+
 # the 'box' entity type has to come before the 'item' one 
 [entity.box]
 component = [ "renderable", "collidable", "flashable" ]
@@ -18,7 +23,7 @@ field.can_drop  = "bool"
 [entity.item]
 has_init = false
 component = [ "renderable", "collidable", "flashable" ]
-exclude   = [ "color", "opacity", "origin", "scale", "angle" ]
+exclude   = [ "color", "opacity", "origin", "angle" ]
 field.position_target = "struct v2"
 field.launch_velocity = "struct v2"
 field.next_position   = "struct v2"

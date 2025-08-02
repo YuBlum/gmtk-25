@@ -1,7 +1,7 @@
 #include "game/entities.h"
 #include "engine/window.h"
 #include "engine/collision.h"
-#include "engine/scenes.h"
+#include "game/scene.h"
 #include "game/global.h"
 
 #define SPEED 10.0f
@@ -17,9 +17,6 @@ bool show_colliders;
 
 void
 player_init(struct player_data *self) {
-#if DEV
-  show_colliders = false;
-#endif
   *self = global.player_state;
 }
 
@@ -28,7 +25,9 @@ player_update(struct player_data *self, float dt) {
 #if DEV
   if (window_is_key_press(K_B)) show_colliders = !show_colliders;
 #endif
-  if (scene_is_in_transition()) return;
+  if (scene_is_in_transition()) {
+   return;
+  }
   /* movement */
   struct v2 move_direction = v2_muls(v2_unit(V2(
     window_is_key_down(K_RIGHT) - window_is_key_down(K_LEFT),
@@ -75,7 +74,7 @@ player_update(struct player_data *self, float dt) {
   }
   self->angle = self->wiggle_cur * 0.5f;
   if (self->position.y - self->size.y * 0.5f > GAME_H * 0.5f) {
-    global.player_state.position      = v2_sub(self->position, V2(0.0f, GAME_H));
+    global.player_state.position      = V2(self->position.x, -GAME_H * 0.5f + 1.5f);
     global.player_state.scale         = self->scale;
     global.player_state.wiggle_cur    = self->wiggle_cur;
     global.player_state.wiggle_target = self->wiggle_target;
@@ -86,14 +85,38 @@ player_update(struct player_data *self, float dt) {
     }
     auto box = entities_get_box_data();
     switch (box->item_drop_type[global.content_box]) {
-      case ITEM_TEST:
-        global.next_item_type = ITEM_TEST2;
-        break;
-      case ITEM_TEST2:
+      case ITEM_LOCK: {
+        global.next_item_type = ITEM_TRASH;
+      } break;
+      case ITEM_TRASH: {
+        global.next_item_type = ITEM_BOX;
+      } break;
+      case ITEM_BOX: {
+        global.next_item_type = ITEM_ROPE;
+      } break;
+      case ITEM_ROPE: {
+        global.next_item_type = ITEM_MIRROR;
+      } break;
+      case ITEM_MIRROR: {
         global.next_item_type = ITEM_NONE;
-        break;
+      } break;
+      case ITEM_ROCK: {
+        global.next_item_type = ITEM_NONE;
+      } break;
+      case ITEM_GLASS: {
+        global.next_item_type = ITEM_NONE;
+      } break;
+      case ITEM_BROOM: {
+        global.next_item_type = ITEM_NONE;
+      } break;
+      case ITEM_KNIFE: {
+        global.next_item_type = ITEM_NONE;
+      } break;
+      case ITEM_KEY: {
+        global.next_item_type = ITEM_NONE;
+      } break;
       case ITEM_NONE:
-        global.next_item_type = ITEM_TEST;
+        global.next_item_type = ITEM_LOCK;
         break;
     }
     scene_transition_to(MAP_DEFAULT_ROOM);

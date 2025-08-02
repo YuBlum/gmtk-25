@@ -3,7 +3,7 @@
 #include "engine/window.h"
 #include "engine/core.h"
 #include "engine/collision.h"
-#include "engine/scenes.h"
+#include "game/scene.h"
 
 #define FOLLOW_SPEED 14.0f
 #define LAUNCH_MIN_SPEED 0.1f
@@ -12,7 +12,7 @@
 #define TIMER_TO_DIE_SPEED 4.0f
 
 void
-item_push(struct item_data *self, enum item_type type, struct v2 position) {
+item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip) {
   if (self->amount >= self->capacity) {
     log_warnlf("%s: items capacity is already full", __func__);
     return;
@@ -29,14 +29,47 @@ item_push(struct item_data *self, enum item_type type, struct v2 position) {
   self->type[i]             = type;
   self->timer_to_die[i]     = 0.0f;
   self->box_index[i]        = -1;
+  self->scale[i]            = V2(flip ? -1.0f : 1.0f, 1.0f);
   switch (type) {
-    case ITEM_TEST: {
+    case ITEM_LOCK: {
+      self->sprite[i] = SPR_LOCK;
+      self->size[i]   = V2S(0.75f);
+    } break;
+    case ITEM_TRASH: {
+      self->sprite[i] = SPR_TRASH;
+      self->size[i]   = V2S(1.0f);
+    } break;
+    case ITEM_BOX: {
+      self->sprite[i] = SPR_BOX_ITEM;
+      self->size[i]   = V2S(0.75f);
+    } break;
+    case ITEM_ROPE: {
+      self->sprite[i] = SPR_ROPE;
+      self->size[i]   = V2S(0.75f);
+    } break;
+    case ITEM_MIRROR: {
+      self->sprite[i] = SPR_MIRROR;
+      self->size[i]   = V2S(0.5f);
+    } break;
+    case ITEM_ROCK: {
       self->sprite[i] = SPR_ITEM_TEST;
       self->size[i]   = V2S(0.5f);
     } break;
-    case ITEM_TEST2: {
-      self->sprite[i] = SPR_ITEM_TEST2;
-      self->size[i]   = V2S(1.0f);
+    case ITEM_GLASS: {
+      self->sprite[i] = SPR_ITEM_TEST;
+      self->size[i]   = V2S(0.5f);
+    } break;
+    case ITEM_BROOM: {
+      self->sprite[i] = SPR_ITEM_TEST;
+      self->size[i]   = V2S(0.5f);
+    } break;
+    case ITEM_KNIFE: {
+      self->sprite[i] = SPR_ITEM_TEST;
+      self->size[i]   = V2S(0.5f);
+    } break;
+    case ITEM_KEY: {
+      self->sprite[i] = SPR_ITEM_TEST;
+      self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_AMOUNT:
       break;
@@ -49,7 +82,7 @@ item_remove(struct item_data *self, uint32_t index) {
     log_warnlf("%s: index '%u' bigger than the items amount", __func__, index);
     return;
   }
-  static_assert(sizeof (struct item_data) == sizeof (void *) * 12 + 8, "update the item removal, missing fields or a field was removed");
+  static_assert(sizeof (struct item_data) == sizeof (void *) * 13 + 8, "update the item removal, missing fields or a field was removed");
   uint32_t i, max = --self->amount;
   for (i = index; i < max; i++) self->position[i]        = self->position[i + 1];
   for (i = index; i < max; i++) self->sprite[i]          = self->sprite[i + 1];
@@ -63,6 +96,7 @@ item_remove(struct item_data *self, uint32_t index) {
   for (i = index; i < max; i++) self->type[i]            = self->type[i + 1];
   for (i = index; i < max; i++) self->timer_to_die[i]    = self->timer_to_die[i + 1];
   for (i = index; i < max; i++) self->box_index[i]       = self->box_index[i + 1];
+  for (i = index; i < max; i++) self->scale[i]           = self->scale[i + 1];
 }
 
 void
@@ -73,11 +107,11 @@ item_update(struct item_data *self, float dt) {
   auto player = entities_get_player_data();
   if (player->item_held >= 0) {
     int32_t i = player->item_held;
-    self->position_target[i] = player->scale.x > 0.0f ? V2(player->position.x - player->size.x * 0.5f, player->position.y)
-                                                      : V2(player->position.x + player->size.x * 0.5f, player->position.y);
+    self->scale[i].x = player->scale.x > 0.0f ? 1.0f : -1.0f;
+    self->position_target[i] = V2(player->position.x - player->size.x * 0.5f * self->scale[i].x, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 12 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 13 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity', 'next_position', 'position_target' and 'depth' fields don't need to be added to the swapping */
@@ -89,6 +123,7 @@ item_update(struct item_data *self, float dt) {
     auto flash_target     = self->flash_target[i];
     auto timer_to_die     = self->timer_to_die[i];
     auto box_index        = self->box_index[i];
+    auto scale            = self->scale[i];
     item_remove(self, i);
     self->amount++;
     self->type[self->amount - 1]             = type;
@@ -100,6 +135,7 @@ item_update(struct item_data *self, float dt) {
     self->timer_to_die[self->amount - 1]     = timer_to_die;
     self->box_index[self->amount - 1]        = box_index;
     self->position_target[self->amount - 1]  = position;
+    self->scale[self->amount - 1]            = scale;
     float launch_angle;
     if (player->scale.x < 0.0f) {
       launch_angle = randf() < 0.5f ? randf() * (PI/3.0f) + 5.0f*PI/3.0f : randf() * (PI/3.0f); // between 60 and 300 degrees (forward arc)
@@ -180,14 +216,25 @@ item_update(struct item_data *self, float dt) {
   }
 }
 
+
+#if DEV
+extern bool show_colliders;
+#endif
+
 void
 item_render(struct item_data *self) {
   renderer_request_sprites(
     self->amount,
     self->sprite,
     self->position,
-    0, 0, 0, 0, 0,
+    0, 0,
+    self->scale,
+    0, 0,
     self->depth,
     self->flash
   );
+#if DEV
+  for (uint32_t i = 0; i < self->amount; i++)
+    if (show_colliders) renderer_request_rect(self->position[i], self->size[i], BLUE, 0.4f, -100.0f);
+#endif
 }

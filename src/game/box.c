@@ -35,7 +35,7 @@ box_update(struct box_data *self, float dt) {
         self->flash_target[target] = 0.0f;
       } else if (window_is_key_press(K_A) && self->can_drop[target]) {
         player->item_held = item->amount;
-        item_push(item, self->item_drop_type[target], self->position[target]);
+        item_push(item, self->item_drop_type[target], self->position[target], false);
         item->depth[player->item_held] = player->depth - 1.0f;
         self->item_drop_type[target] = ITEM_NONE;
         self->can_drop[target] = false;
