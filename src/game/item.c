@@ -30,6 +30,7 @@ item_push(struct item_data *self, enum item_type type, struct v2 position, bool 
   self->timer_to_die[i]     = 0.0f;
   self->box_index[i]        = -1;
   self->scale[i]            = V2(flip ? -1.0f : 1.0f, 1.0f);
+  self->angle[i]            = 0.0f;
   switch (type) {
     case ITEM_LOCK: {
       self->sprite[i] = SPR_LOCK;
@@ -38,6 +39,20 @@ item_push(struct item_data *self, enum item_type type, struct v2 position, bool 
     case ITEM_TRASH: {
       self->sprite[i] = SPR_TRASH;
       self->size[i]   = V2S(1.0f);
+    } break;
+    case ITEM_RANDOM_TRASH: {
+      auto chance = randf();
+      if (chance < 0.25f) {
+        self->sprite[i] = SPR_TRASH;
+      } else if (chance < 0.5f) {
+        self->sprite[i] = SPR_RANDOM_TRASH0;
+      } else if (chance < 0.75f) {
+        self->sprite[i] = SPR_RANDOM_TRASH1;
+      } else {
+        self->sprite[i] = SPR_RANDOM_TRASH2;
+      }
+      self->angle[i] = randf() * PI * 2.0f;
+      self->size[i]  = V2S(0.75f);
     } break;
     case ITEM_BOX: {
       self->sprite[i] = SPR_BOX_ITEM;
@@ -52,7 +67,7 @@ item_push(struct item_data *self, enum item_type type, struct v2 position, bool 
       self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_ROCK: {
-      self->sprite[i] = SPR_ITEM_TEST;
+      self->sprite[i] = SPR_ROCK;
       self->size[i]   = V2S(0.5f);
     } break;
     case ITEM_GLASS: {
@@ -82,7 +97,7 @@ item_remove(struct item_data *self, uint32_t index) {
     log_warnlf("%s: index '%u' bigger than the items amount", __func__, index);
     return;
   }
-  static_assert(sizeof (struct item_data) == sizeof (void *) * 13 + 8, "update the item removal, missing fields or a field was removed");
+  static_assert(sizeof (struct item_data) == sizeof (void *) * 14 + 8, "update the item removal, missing fields or a field was removed");
   uint32_t i, max = --self->amount;
   for (i = index; i < max; i++) self->position[i]        = self->position[i + 1];
   for (i = index; i < max; i++) self->sprite[i]          = self->sprite[i + 1];
@@ -97,6 +112,7 @@ item_remove(struct item_data *self, uint32_t index) {
   for (i = index; i < max; i++) self->timer_to_die[i]    = self->timer_to_die[i + 1];
   for (i = index; i < max; i++) self->box_index[i]       = self->box_index[i + 1];
   for (i = index; i < max; i++) self->scale[i]           = self->scale[i + 1];
+  for (i = index; i < max; i++) self->angle[i]           = self->angle[i + 1];
 }
 
 void
@@ -111,7 +127,7 @@ item_update(struct item_data *self, float dt) {
     self->position_target[i] = V2(player->position.x - player->size.x * 0.5f * self->scale[i].x, player->position.y);
     self->position[i] = v2_lerp(self->position[i], self->position_target[i], FOLLOW_SPEED * dt);
     if (!interacting) return;
-    static_assert(sizeof (struct item_data) == sizeof (void *) * 13 + 8, "update the items swap, missing fields or a field was removed");
+    static_assert(sizeof (struct item_data) == sizeof (void *) * 14 + 8, "update the items swap, missing fields or a field was removed");
     /* the code below is moving the current held item into the end of the list
        * this may seem useless, but it's necessary to make you able to swap between multiple items
        * the 'launch_velocity', 'next_position', 'position_target' and 'depth' fields don't need to be added to the swapping */
@@ -124,6 +140,7 @@ item_update(struct item_data *self, float dt) {
     auto timer_to_die     = self->timer_to_die[i];
     auto box_index        = self->box_index[i];
     auto scale            = self->scale[i];
+    auto angle            = self->angle[i];
     item_remove(self, i);
     self->amount++;
     self->type[self->amount - 1]             = type;
@@ -136,6 +153,7 @@ item_update(struct item_data *self, float dt) {
     self->box_index[self->amount - 1]        = box_index;
     self->position_target[self->amount - 1]  = position;
     self->scale[self->amount - 1]            = scale;
+    self->angle[self->amount - 1]            = angle;
     float launch_angle;
     if (player->scale.x < 0.0f) {
       launch_angle = randf() < 0.5f ? randf() * (PI/3.0f) + 5.0f*PI/3.0f : randf() * (PI/3.0f); // between 60 and 300 degrees (forward arc)
@@ -143,7 +161,7 @@ item_update(struct item_data *self, float dt) {
       launch_angle = randf() * (2.0f*PI/3.0f) + 2.0f*PI/3.0f; // between 120 and 240 degrees
     }
     self->launch_velocity[self->amount - 1]  = v2_muls(V2(cosf(launch_angle), sinf(launch_angle)),
-                                                       randf() * (LAUNCH_MAX_SPEED-LAUNCH_MIN_SPEED) + LAUNCH_MIN_SPEED);
+                                                       randf_from_to(LAUNCH_MIN_SPEED, LAUNCH_MAX_SPEED));
     player->item_held = -1;
     return;
   }
@@ -227,7 +245,8 @@ item_render(struct item_data *self) {
     self->amount,
     self->sprite,
     self->position,
-    0, 0,
+    0,
+    self->angle,
     self->scale,
     0, 0,
     self->depth,

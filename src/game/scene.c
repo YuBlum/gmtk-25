@@ -23,7 +23,12 @@ scene_load(enum map map) {
   #endif
   bool is_door_locked = global.next_room_layout == ROOM_LOCK;
   bool has_extra_item = global.extra_item_type != ITEM_NONE;
-  uint32_t items_amount = global.next_item_type != ITEM_NONE ? g_maps_data[map].items_amount : 0;
+  uint32_t items_amount = 0;
+  if (global.next_room_layout == ROOM_TRASH) {
+    items_amount = 1000;
+  } else if (global.next_item_type != ITEM_NONE) {
+    items_amount = g_maps_data[map].items_amount;
+  }
   struct entities_layout layout = { 0 };
   layout.has_player = true;
   layout.has_door = true;
@@ -34,8 +39,16 @@ scene_load(enum map map) {
   g_scene.next_map = g_scene.current_map;
   if (!entities_layout_set(&layout)) return false;
   auto item = entities_get_item_data();
-  for (uint32_t i = 0; i < items_amount; i++) {
-    item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false);
+  if (global.next_room_layout == ROOM_TRASH) {
+    struct v2 item_pos;
+    for (uint32_t i = 0; i < items_amount; i++) {
+      item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(-8.0f, +5.0f));
+      item_push(item, ITEM_RANDOM_TRASH, item_pos, false);
+    }
+  } else {
+    for (uint32_t i = 0; i < items_amount; i++) {
+      item_push(item, global.next_item_type, g_maps_data[map].items_position[i], false);
+    }
   }
   if (has_extra_item) {
     auto player = entities_get_player_data();

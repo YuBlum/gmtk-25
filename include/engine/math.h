@@ -13,6 +13,8 @@ static inline float lerp(float a, float b, float t) { return a + t * (b - a); }
 static inline float signf(float x) { return (x > 0.0f) - (x < 0.0f); }
 
 #define randf() ((float)rand()/(float)RAND_MAX)
+#define randf_from_to(X, Y) (randf() * ((Y) - (X)) + (X))
+#define rand_from_to(X, Y) ((uint32_t)randf_from_to(X, Y))
 
 struct v2 { float x, y; };
 #define V2(x, y) ((struct v2) {x, y})

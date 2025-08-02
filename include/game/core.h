@@ -17,6 +17,7 @@ enum item_type {
   ITEM_BROOM,
   ITEM_KNIFE,
   ITEM_KEY,
+  ITEM_RANDOM_TRASH,
   ITEM_AMOUNT,
   ITEM_NONE = ITEM_AMOUNT
 };
@@ -29,6 +30,7 @@ enum box_type {
 enum room_layout {
   ROOM_DEFAULT = 0,
   ROOM_LOCK,
+  ROOM_TRASH,
 };
 
 void item_push(struct item_data *self, enum item_type type, struct v2 position, bool flip);

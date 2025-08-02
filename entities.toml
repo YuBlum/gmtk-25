@@ -24,7 +24,7 @@ field.can_drop  = "bool"
 [entity.item]
 has_init = false
 component = [ "renderable", "collidable", "flashable" ]
-exclude   = [ "color", "opacity", "origin", "angle" ]
+exclude   = [ "color", "opacity", "origin" ]
 field.position_target = "struct v2"
 field.launch_velocity = "struct v2"
 field.next_position   = "struct v2"
