@@ -1,8 +1,9 @@
-- [ ] Cutscenes
 - [ ] Helpers for the controls
-- [ ] Title in the end
-- [ ] Postprocessing
 - [ ] Sfx
+- [ ] Title in the end
+- [ ] Cutscenes
+- [ ] Particles
+- [ ] Postprocessing
 - [ ] Framerate fix (target framerate)
 - [x] Walls
 - [x] Boxes
