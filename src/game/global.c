@@ -27,6 +27,7 @@ global_init(void) {
   global.player_state.wiggle_cur    = 0.0f;
   global.player_state.wiggle_target = 0.0f;
   global.player_state.depth         = 0.0f;
+  global.player_state.step_timer    = 0.0f;
   global.player_state.item_held     = -1;
   global.extra_item_type     = ITEM_NONE;
   global.extra_item_sprite   = 0;

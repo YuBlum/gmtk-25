@@ -6,9 +6,10 @@
 #include "engine/renderer.h"
 
 struct door_data {
-  bool locked;
   struct v2 left;
   struct v2 right;
+  bool has_collided;
+  bool locked;
 };
 
 void door_init(struct door_data *self);

@@ -17,6 +17,8 @@ struct player_data {
   float interact_rad;
   float wiggle_cur;
   float wiggle_target;
+  float step_timer;
+  enum sound step_sound;
   int32_t item_held;
 };
 

@@ -5,12 +5,15 @@ field.interact_pos  = "struct v2"
 field.interact_rad  = "float"
 field.wiggle_cur    = "float"
 field.wiggle_target = "float"
+field.step_timer    = "float"
+field.step_sound    = "enum sound"
 field.item_held     = "int32_t"
 
 [entity.unique.door]
-field.locked = "bool"
 field.left   = "struct v2"
 field.right  = "struct v2"
+field.has_collided = "bool"
+field.locked = "bool"
 
 # the 'box' entity type has to come before the 'item' one 
 [entity.box]

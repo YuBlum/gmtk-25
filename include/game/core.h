@@ -3,6 +3,7 @@
 
 #include "engine/math.h"
 #include "engine/core.h"
+#include "game/sound.h"
 
 struct item_data;
 

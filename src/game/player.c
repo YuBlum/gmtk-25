@@ -3,6 +3,7 @@
 #include "engine/collision.h"
 #include "game/scene.h"
 #include "game/global.h"
+#include "game/sound.h"
 
 #define SPEED 10.0f
 #define WIGGLE 1.0f
@@ -10,6 +11,7 @@
 #define WIGGLE_EPSILON 0.01f
 #define WIGGLE_POS (+WIGGLE-WIGGLE_EPSILON)
 #define WIGGLE_NEG (-WIGGLE+WIGGLE_EPSILON)
+#define STEP_SPEED 4.0f
 
 #if DEV
 bool show_colliders;
@@ -63,6 +65,14 @@ player_update(struct player_data *self, float dt) {
   self->position = next_position;
   self->interact_pos = v2_add(self->position, self->origin);
   bool moving = move_direction.x != 0.0f || move_direction.y != 0.0f;
+  /* step sounds */
+  if (moving) {
+    self->step_timer += STEP_SPEED * dt;
+    if (self->step_timer >= 1.0f) {
+      self->step_timer = 0.0f;
+      (void)mixer_sound_play(sound_get(SND_STEP));
+    }
+  }
   /* wiggle */
   self->wiggle_cur = lerp(self->wiggle_cur, self->wiggle_target, WIGGLE_SPEED * dt);
   if (moving) {
@@ -76,6 +86,7 @@ player_update(struct player_data *self, float dt) {
         (self->wiggle_cur < 0.0f && self->wiggle_cur >= -WIGGLE_EPSILON)) self->wiggle_cur = 0.0f;
   }
   self->angle = self->wiggle_cur * 0.5f;
+  /* go to next room state */
   if (!global.end && self->position.y - self->size.y * 0.5f > GAME_H * 0.5f) {
     global.player_state.position      = V2(self->position.x, -GAME_H * 0.5f + 1.5f);
     global.player_state.scale         = self->scale;

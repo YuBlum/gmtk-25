@@ -4,6 +4,7 @@
 #include "engine/core.h"
 #include "engine/collision.h"
 #include "game/scene.h"
+#include "game/sound.h"
 
 #define FOLLOW_SPEED 14.0f
 #define LAUNCH_MIN_SPEED 0.1f
@@ -179,6 +180,7 @@ item_update(struct item_data *self, float dt) {
     self->launch_velocity[self->amount - 1]  = v2_muls(V2(cosf(launch_angle), sinf(launch_angle)),
                                                        randf_from_to(LAUNCH_MIN_SPEED, LAUNCH_MAX_SPEED));
     player->item_held = -1;
+    (void)mixer_sound_play(sound_get(SND_DROP));
     return;
   }
   if (interacting) {
@@ -188,6 +190,7 @@ item_update(struct item_data *self, float dt) {
       self->depth[i] = player->depth - 1.0f;
       self->launch_velocity[i] = V2S(0.0f);
       player->item_held = i;
+      (void)mixer_sound_play(sound_get(SND_PICKUP));
       break;
     }
     for (uint32_t i = 0; i < self->amount; i++) {

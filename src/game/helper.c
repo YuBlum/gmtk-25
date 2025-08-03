@@ -1,5 +1,6 @@
 #include "engine/window.h"
 #include "engine/renderer.h"
+#include "game/global.h"
 
 struct helper_button {
   enum key key;
@@ -74,6 +75,7 @@ helper_update(float dt) {
 
 void
 helper_render(void) {
+  if (global.going_out) return;
   for (uint32_t i = 0; i < BUTTONS_AMOUNT; i++) {
     renderer_request_sprite(
       g_helper.buttons[i].sprite,

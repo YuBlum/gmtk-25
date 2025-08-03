@@ -8,6 +8,7 @@
 #include "game/entities.h"
 #include "game/global.h"
 #include "game/helper.h"
+#include "game/sound.h"
 
 #define WINDOW_W (GAME_W_PIXEL * GAME_S)
 #define WINDOW_H (GAME_H_PIXEL * GAME_S)
@@ -22,6 +23,11 @@ main(void) {
   }
   if (!window_make(WINDOW_W, WINDOW_H)) return 1;
   if (!mixer_make()) {
+    window_destroy();
+    return 1;
+  }
+  if (!sound_init()) {
+    mixer_destroy();
     window_destroy();
     return 1;
   }
