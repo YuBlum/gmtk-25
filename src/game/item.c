@@ -131,7 +131,7 @@ item_update(struct item_data *self, float dt) {
       self->flash_target[i] = 0.0f;
     }
   }
-  bool interacting = window_is_key_press(K_A) && !box_blocked_button();
+  bool interacting = window_is_key_press(K_INTERACT) && !box_blocked_button();
   auto player = entities_get_player_data();
   if (player->item_held >= 0) {
     int32_t i = player->item_held;

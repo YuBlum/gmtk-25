@@ -19,14 +19,14 @@ key_callback(GLFWwindow* _window, int key, int _scancode, int action, int _mods)
   (void)_window; (void)_scancode; (void) _mods;
   if (action != GLFW_PRESS && action != GLFW_RELEASE) return;
   switch (key) {
-    case GLFW_KEY_ESCAPE: g_window.keys[K_EXIT]    = action == GLFW_PRESS; break;
-    case GLFW_KEY_RIGHT:  g_window.keys[K_RIGHT]   = action == GLFW_PRESS; break;
-    case GLFW_KEY_LEFT:   g_window.keys[K_LEFT]    = action == GLFW_PRESS; break;
-    case GLFW_KEY_UP:     g_window.keys[K_UP]      = action == GLFW_PRESS; break;
-    case GLFW_KEY_DOWN:   g_window.keys[K_DOWN]    = action == GLFW_PRESS; break;
-    case GLFW_KEY_Z:      g_window.keys[K_A]       = action == GLFW_PRESS; break;
-    case GLFW_KEY_X:      g_window.keys[K_B]       = action == GLFW_PRESS; break;
-    case GLFW_KEY_R:      g_window.keys[K_RESTART] = action == GLFW_PRESS; break;
+    case GLFW_KEY_ESCAPE: g_window.keys[K_EXIT]      = action == GLFW_PRESS; break;
+    case GLFW_KEY_RIGHT:  g_window.keys[K_RIGHT]     = action == GLFW_PRESS; break;
+    case GLFW_KEY_LEFT:   g_window.keys[K_LEFT]      = action == GLFW_PRESS; break;
+    case GLFW_KEY_UP:     g_window.keys[K_UP]        = action == GLFW_PRESS; break;
+    case GLFW_KEY_DOWN:   g_window.keys[K_DOWN]      = action == GLFW_PRESS; break;
+    case GLFW_KEY_Z:      g_window.keys[K_INTERACT]  = action == GLFW_PRESS; break;
+    case GLFW_KEY_R:      g_window.keys[K_RESTART]   = action == GLFW_PRESS; break;
+    case GLFW_KEY_F1:     g_window.keys[K_COLLIDERS] = action == GLFW_PRESS; break;
   }
 }
 
@@ -113,6 +113,17 @@ window_is_key_up(enum key key) {
   }
 #endif
   return !g_window.keys[key];
+}
+
+bool
+window_is_key_release(enum key key) {
+#if DEV
+  if (key >= KEY_AMOUNT) {
+    log_errorlf("%s: passing invalid key", __func__);
+    return false;
+  }
+#endif
+  return g_window.pkeys[key] && !g_window.keys[key];
 }
 
 float

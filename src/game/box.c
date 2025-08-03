@@ -62,7 +62,7 @@ box_update(struct box_data *self, float dt) {
     if (player->item_held == -1) {
       if (self->item_drop_type[target] == ITEM_NONE) {
         self->flash_target[target] = 0.0f;
-      } else if (window_is_key_press(K_A) && self->can_drop[target]) {
+      } else if (window_is_key_press(K_INTERACT) && self->can_drop[target]) {
         player->item_held = item->amount;
         item_push(item, self->item_drop_type[target], self->position[target], false, false, 0.0f);
         item->depth[player->item_held] = player->depth - 1.0f;
@@ -73,7 +73,7 @@ box_update(struct box_data *self, float dt) {
     } else {
       if (self->item_drop_type[target] != ITEM_NONE) {
         self->flash_target[target] = 0.0f;
-      } else if (window_is_key_press(K_A)) {
+      } else if (window_is_key_press(K_INTERACT)) {
         item->position_target[player->item_held] = self->position[target];
         item->timer_to_die[player->item_held] = 1.0f;
         item->box_index[player->item_held] = target;

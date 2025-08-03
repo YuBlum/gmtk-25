@@ -1,6 +1,6 @@
-- [ ] Helpers for the controls
+- [x] Helpers for the controls
 - [ ] Sfx
-- [ ] Title in the end
+- [ ] Title with credits in the end
 - [ ] Cutscenes
 - [ ] Particles
 - [ ] Postprocessing

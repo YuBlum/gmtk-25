@@ -23,7 +23,7 @@ player_init(struct player_data *self) {
 void
 player_update(struct player_data *self, float dt) {
 #if DEV
-  if (window_is_key_press(K_B)) {
+  if (window_is_key_press(K_COLLIDERS)) {
     show_colliders = !show_colliders;
   }
 #endif
