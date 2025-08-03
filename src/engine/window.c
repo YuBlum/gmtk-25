@@ -60,7 +60,6 @@ window_make(uint32_t width, uint32_t height) {
   (void)memset(g_window.keys, false, sizeof (bool) * KEY_AMOUNT);
   (void)glfwSetKeyCallback(g_window.handle, key_callback);
   log_infol("window input setup");
-  g_window.time = glfwGetTime();
   log_infol("window creation complete!");
   return true;
 }

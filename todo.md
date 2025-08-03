@@ -1,3 +1,8 @@
+- [ ] Cutscenes
+- [ ] Helpers for the controls
+- [ ] Title in the end
+- [ ] Postprocessing
+- [ ] Sfx
 - [ ] Framerate fix (target framerate)
 - [x] Walls
 - [x] Boxes
@@ -8,5 +13,4 @@
 - [x] Item usage
 - [x] Design exit route
 - [x] Art
-- [ ] Sfx
 - [x] Ending

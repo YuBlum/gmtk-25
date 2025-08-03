@@ -40,8 +40,9 @@ main(void) {
     window_destroy();
     return 1;
   }
+  float dt = window_get_delta_time(); /* call just to setup timer */
   while (window_is_running()) {
-    float dt = window_get_delta_time();
+    dt = window_get_delta_time();
     if (window_is_key_down(K_EXIT)) window_close();
     entities_update(dt);
     scene_update(dt);
