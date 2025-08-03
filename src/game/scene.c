@@ -16,7 +16,7 @@ struct scene {
 #define BOX_Y 1.0f
 #define MIRROR_Y 1.0f
 #define BOX_ORIGIN V2(-0.25f, 0.5f)
-#define TRASH_AMOUNT 100
+#define TRASH_AMOUNT 200
 
 static struct scene g_scene;
 
