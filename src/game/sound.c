@@ -11,14 +11,18 @@ uint32_t sounds[SOUNDS_AMOUNT];
 
 bool
 sound_init(void) {
-  static_assert(SOUNDS_AMOUNT == 5, "not all sounds are initialized");
+  static_assert(SOUNDS_AMOUNT == 7, "not all sounds are initialized");
   struct sound_result res;
   RESERVE_SOUND(SND_STEP, "./assets/sfx/step.wav", false);
   RESERVE_SOUND(SND_OPEN, "./assets/sfx/open.wav", false);
   RESERVE_SOUND(SND_CLOSE, "./assets/sfx/close.wav", false);
   RESERVE_SOUND(SND_PICKUP, "./assets/sfx/pickup.wav", false);
   RESERVE_SOUND(SND_DROP, "./assets/sfx/drop.wav", false);
+  RESERVE_SOUND(SND_PUT, "./assets/sfx/put.wav", false);
+  RESERVE_SOUND(SND_TAKE, "./assets/sfx/take.wav", false);
   (void)mixer_sound_set_volume(sounds[SND_STEP], 0.5f);
+  (void)mixer_sound_set_volume(sounds[SND_PUT], 0.5f);
+  (void)mixer_sound_set_volume(sounds[SND_TAKE], 0.5f);
   return true;
 }
 

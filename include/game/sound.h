@@ -12,6 +12,8 @@ enum sound {
   SND_CLOSE,
   SND_PICKUP,
   SND_DROP,
+  SND_PUT,
+  SND_TAKE,
   SOUNDS_AMOUNT
 };
 

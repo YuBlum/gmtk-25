@@ -1,5 +1,6 @@
 #include "game/entities.h"
 #include "game/flash.h"
+#include "game/sound.h"
 #include "engine/collision.h"
 #include "engine/window.h"
 
@@ -69,6 +70,7 @@ box_update(struct box_data *self, float dt) {
         self->item_drop_type[target] = ITEM_NONE;
         self->can_drop[target] = false;
         g_block_btn = true;
+        (void)mixer_sound_play(sound_get(SND_TAKE));
       }
     } else {
       if (self->item_drop_type[target] != ITEM_NONE) {
@@ -80,6 +82,7 @@ box_update(struct box_data *self, float dt) {
         self->item_drop_type[target] = item->type[player->item_held];
         player->item_held = -1;
         g_block_btn = true;
+        (void)mixer_sound_play(sound_get(SND_PUT));
       }
     }
   }
