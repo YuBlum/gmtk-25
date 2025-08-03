@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="24">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="25">
  <editorsettings>
   <export target="default_room.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../tilesets/room_tileset.tsj"/>
- <layer id="1" name="tiles" width="20" height="20">
+ <layer id="1" name="tiles" width="20" height="20" locked="1">
   <data encoding="csv">
 1,14,14,14,14,14,14,15,4,3,4,3,13,14,14,14,14,14,14,2,
 1,18,18,18,18,18,18,19,4,3,4,3,17,18,18,18,18,18,18,2,
@@ -28,7 +28,7 @@
 5,9,9,9,9,9,9,9,4,3,4,3,9,9,9,9,9,9,9,6
 </data>
  </layer>
- <objectgroup id="2" name="solids" locked="1">
+ <objectgroup id="2" name="solids">
   <properties>
    <property name="has-size" type="bool" value="true"/>
   </properties>
@@ -37,13 +37,13 @@
   <object id="8" x="16" y="0" width="112" height="32"/>
   <object id="10" x="16" y="304" width="288" height="16"/>
   <object id="9" x="192" y="0" width="112" height="32"/>
-  <object id="17" x="52" y="52" width="24" height="24"/>
-  <object id="18" x="244" y="52" width="24" height="24"/>
+  <object id="17" x="54" y="68" width="28" height="8"/>
+  <object id="18" x="238" y="68" width="28" height="8"/>
  </objectgroup>
- <objectgroup id="3" name="items">
+ <objectgroup id="3" name="items" locked="1">
   <object id="12" x="160" y="160"/>
  </objectgroup>
- <objectgroup id="4" name="boxes">
+ <objectgroup id="4" name="boxes" locked="1">
   <properties>
    <property name="type" value="enum box_type"/>
   </properties>

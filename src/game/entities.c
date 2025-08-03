@@ -39,6 +39,11 @@ entities_layout_set(const struct entities_layout *layout) {
       log_errorl("couldn't allocate box position data");
       return false;
     }
+    g_entities.box_data.scale = arena_push_array(g_entities.arena, false, struct v2, layout->box_capacity);
+    if (!g_entities.box_data.scale) {
+      log_errorl("couldn't allocate box scale data");
+      return false;
+    }
     g_entities.box_data.sprite = arena_push_array(g_entities.arena, false, enum sprite, layout->box_capacity);
     if (!g_entities.box_data.sprite) {
       log_errorl("couldn't allocate box sprite data");
@@ -62,6 +67,31 @@ entities_layout_set(const struct entities_layout *layout) {
     g_entities.box_data.flash_target = arena_push_array(g_entities.arena, false, float, layout->box_capacity);
     if (!g_entities.box_data.flash_target) {
       log_errorl("couldn't allocate box flash_target data");
+      return false;
+    }
+    g_entities.box_data.target_scale = arena_push_array(g_entities.arena, false, struct v2, layout->box_capacity);
+    if (!g_entities.box_data.target_scale) {
+      log_errorl("couldn't allocate box target_scale data");
+      return false;
+    }
+    g_entities.box_data.state = arena_push_array(g_entities.arena, false, enum box_state, layout->box_capacity);
+    if (!g_entities.box_data.state) {
+      log_errorl("couldn't allocate box state data");
+      return false;
+    }
+    g_entities.box_data.target_y = arena_push_array(g_entities.arena, false, float, layout->box_capacity);
+    if (!g_entities.box_data.target_y) {
+      log_errorl("couldn't allocate box target_y data");
+      return false;
+    }
+    g_entities.box_data.sprite_opened = arena_push_array(g_entities.arena, false, enum sprite, layout->box_capacity);
+    if (!g_entities.box_data.sprite_opened) {
+      log_errorl("couldn't allocate box sprite_opened data");
+      return false;
+    }
+    g_entities.box_data.sprite_closed = arena_push_array(g_entities.arena, false, enum sprite, layout->box_capacity);
+    if (!g_entities.box_data.sprite_closed) {
+      log_errorl("couldn't allocate box sprite_closed data");
       return false;
     }
     g_entities.box_data.type = arena_push_array(g_entities.arena, false, enum box_type, layout->box_capacity);

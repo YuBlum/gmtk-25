@@ -7,6 +7,6 @@
 - [x] Design items
 - [x] Item usage
 - [x] Design exit route
-- [ ] Art
+- [x] Art
 - [ ] Sfx
-- [ ] Ending
+- [x] Ending

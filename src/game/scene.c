@@ -91,19 +91,24 @@ scene_load(enum map map) {
   global.layout_box = -1;
   global.content_box = -1;
   for (uint32_t i = 0; i < box->amount; i++) {
-    box->position[i] = g_maps_data[map].boxes_position[i];
+    box->target_y[i] = g_maps_data[map].boxes_position[i].y;
+    box->position[i] = V2(g_maps_data[map].boxes_position[i].x, GAME_H*0.5f + 1.0f);
     box->type[i]     = g_maps_data[map].boxes_type[i];
     switch (box->type[i]) {
       case BOX_LAYOUT:
         #if DEV
         if (global.layout_box != -1) log_errorlf("map '%u' has two layout boxes", map);
         #endif
+        box->sprite_opened[i] = SPR_BOX_LAYOUT_OPENED;
+        box->sprite_closed[i] = SPR_BOX_LAYOUT_CLOSED;
         global.layout_box = i;
         break;
       case BOX_CONTENT:
         #if DEV
         if (global.content_box != -1) log_errorlf("map '%u' has two content boxes", map);
         #endif
+        box->sprite_opened[i] = SPR_BOX_CONTENT_OPENED;
+        box->sprite_closed[i] = SPR_BOX_CONTENT_CLOSED;
         global.content_box = i;
         break;
     }
@@ -124,8 +129,8 @@ scene_load(enum map map) {
     case ROOM_LOCK: {
       auto door = entities_get_door_data();
       door->locked = true;
-      solid->position[solid->amount-1] = door->position;
-      solid->size[solid->amount-1] = door->size;
+      solid->position[solid->amount-1] = DOOR_POSITION;
+      solid->size[solid->amount-1] = DOOR_SIZE;
     } break;
     case ROOM_BOX:
     case ROOM_OPENED_BOX: {

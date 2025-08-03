@@ -13,8 +13,8 @@ static const struct v2 g_map_default_room_solids_position[7] = {
   { 72.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (16.0/UNIT_PER_PIXEL) },
   { 160.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (312.0/UNIT_PER_PIXEL) },
   { 248.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (16.0/UNIT_PER_PIXEL) },
-  { 64.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
-  { 256.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (64.0/UNIT_PER_PIXEL) },
+  { 68.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (72.0/UNIT_PER_PIXEL) },
+  { 252.0/UNIT_PER_PIXEL - GAME_W*0.5f, GAME_H*0.5f - (72.0/UNIT_PER_PIXEL) },
 };
 
 static const struct v2 g_map_default_room_solids_size[7] = {
@@ -23,8 +23,8 @@ static const struct v2 g_map_default_room_solids_size[7] = {
   { 112.0/UNIT_PER_PIXEL, 32.0/UNIT_PER_PIXEL },
   { 288.0/UNIT_PER_PIXEL, 16.0/UNIT_PER_PIXEL },
   { 112.0/UNIT_PER_PIXEL, 32.0/UNIT_PER_PIXEL },
-  { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
-  { 24.0/UNIT_PER_PIXEL, 24.0/UNIT_PER_PIXEL },
+  { 28.0/UNIT_PER_PIXEL, 8.0/UNIT_PER_PIXEL },
+  { 28.0/UNIT_PER_PIXEL, 8.0/UNIT_PER_PIXEL },
 };
 
 static const struct v2 g_map_default_room_items_position[1] = {
@@ -1669,10 +1669,10 @@ static const struct {
       { 0, 32 },
       { 0, 32 },
       { 0, 32 },
-      { 0, 32 },
-      { 0, 32 },
-      { 0, 32 },
-      { 0, 32 },
+      { 48, 0 },
+      { 32, 0 },
+      { 48, 0 },
+      { 32, 0 },
       { 0, 32 },
       { 0, 32 },
       { 0, 32 },
