@@ -16,7 +16,7 @@ struct scene {
 #define BOX_Y 1.0f
 #define MIRROR_Y 1.0f
 #define BOX_ORIGIN V2(-0.25f, 0.5f)
-#define TRASH_AMOUNT 1000
+#define TRASH_AMOUNT 100
 
 static struct scene g_scene;
 
@@ -58,7 +58,7 @@ scene_load(enum map map) {
   if (g_scene.layout == ROOM_TRASH) {
     struct v2 item_pos;
     for (uint32_t i = 0; i < TRASH_AMOUNT; i++) {
-      item_pos = V2(randf_from_to(-8.0f, +8.0f), randf_from_to(-8.0f, +4.5f));
+      item_pos = V2(randf_from_to(-2.0f, +2.0f), randf_from_to(-2.0f, +2.5f));
       item_push(item, ITEM_RANDOM_TRASH, item_pos, false, true, randf_from_to(4.0f, 8.0f));
     }
   } else if (g_scene.layout == ROOM_CLEANED_TRASH) {
