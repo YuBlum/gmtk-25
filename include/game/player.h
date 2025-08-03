@@ -20,6 +20,7 @@ struct player_data {
   float step_timer;
   enum sound step_sound;
   int32_t item_held;
+  float end_opacity;
 };
 
 void player_init(struct player_data *self);

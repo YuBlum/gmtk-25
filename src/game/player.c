@@ -20,6 +20,7 @@ bool show_colliders;
 void
 player_init(struct player_data *self) {
   *self = global.player_state;
+  self->end_opacity = 0.0f;
 }
 
 void
@@ -27,10 +28,14 @@ player_update(struct player_data *self, float dt) {
 #if DEV
   if (window_is_key_press(K_COLLIDERS)) {
     show_colliders = !show_colliders;
+    global.going_out = true;
   }
 #endif
   if (scene_is_in_transition()) return;
   if (global.end && !check_rect_rect(self->position, V2(2.0f, 1.0f), V2S(0.0f), V2(GAME_W, GAME_H))) {
+    if (self->end_opacity < 1.0f) {
+      self->end_opacity += dt;
+    }
     return;
   }
   /* movement */
@@ -209,6 +214,30 @@ player_render(struct player_data *self) {
     self->depth,
     0.0f
   );
+  if (global.end) {
+    renderer_request_sprite(
+      SPR_LOGO,
+      V2S(0.0f),
+      V2(0.0f, 2.0f),
+      0.0f,
+      V2S(2.0f),
+      WHITE,
+      self->end_opacity,
+      -100.0f,
+      0.0f
+    );
+    renderer_request_sprite(
+      SPR_BY_YUBLUM,
+      V2S(0.0f),
+      V2(1.0f, -2.0f),
+      0.0f,
+      V2S(1.0f),
+      WHITE,
+      self->end_opacity,
+      -100.0f,
+      0.0f
+    );
+  }
 
 #if DEV
   if (show_colliders) {

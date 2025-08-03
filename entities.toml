@@ -8,6 +8,7 @@ field.wiggle_target = "float"
 field.step_timer    = "float"
 field.step_sound    = "enum sound"
 field.item_held     = "int32_t"
+field.end_opacity   = "float"
 
 [entity.unique.door]
 field.left   = "struct v2"
