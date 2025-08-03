@@ -51,6 +51,6 @@
 static_assert((GAME_W_PIXEL % UNIT_PER_PIXEL) == 0, "GAME_W_PIXEL has to be a multiple of UNIT_PER_PIXEL");
 static_assert((GAME_H_PIXEL % UNIT_PER_PIXEL) == 0, "GAME_H_PIXEL has to be a multiple of UNIT_PER_PIXEL");
 
-#define GAME_TITLE "Game"
+#define GAME_TITLE "Shut in Recursion"
 
 #endif/*__CORE_H__*/

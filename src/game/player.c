@@ -28,7 +28,6 @@ player_update(struct player_data *self, float dt) {
 #if DEV
   if (window_is_key_press(K_COLLIDERS)) {
     show_colliders = !show_colliders;
-    global.going_out = true;
   }
 #endif
   if (scene_is_in_transition()) return;
